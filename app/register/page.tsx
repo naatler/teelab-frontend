@@ -44,7 +44,7 @@ export default function RegisterPage() {
 
       setAuth(data.user, data.access_token);
       toast.success('Registration successful!');
-      router.push('/products');
+      router.push('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Registration failed');
     } finally {

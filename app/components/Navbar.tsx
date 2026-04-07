@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useAuthStore } from "@/src/store/useAuthStore";
-import { useCartStore } from "@/src/store/useCartStore";
+import { useAuthStore } from "@/app/store/useAuthStore";
+import { useCartStore } from "@/app/store/useCartStore";
 import { useRouter } from "next/navigation";
 import { FiUser } from "react-icons/fi";
 import { BsHandbag } from "react-icons/bs";
