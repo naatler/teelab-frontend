@@ -1,12 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from '@/app/lib/axios';
-import Navbar from '@/app/components/Navbar';
-import { useAuthStore } from '@/app/store/useAuthStore';
-import toast from 'react-hot-toast';
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "@/app/lib/axios";
+import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer";
+import { useAuthStore } from "@/app/store/useAuthStore";
+import toast from "react-hot-toast";
+import Link from "next/link";
+import {
+  MapPin,
+  Package,
+  ChevronLeft,
+  Loader2,
+  Check,
+  X,
+  Truck,
+  Shield,
+  Tag,
+} from "lucide-react";
 
 interface CartItem {
   id: string;
@@ -36,13 +48,12 @@ export default function CheckoutPage() {
   const { user } = useAuthStore();
   const [cart, setCart] = useState<{ items: CartItem[] } | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
-  const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [notes, setNotes] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState<string>("");
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
-  
-  // Discount state
-  const [discountCode, setDiscountCode] = useState('');
+  const [mounted, setMounted] = useState(false);
+  const [discountCode, setDiscountCode] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState<{
     code: string;
     amount: number;
@@ -50,30 +61,34 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
     fetchData();
-  }, [user]);
+  }, [user, mounted]);
 
   const fetchData = async () => {
     try {
       const [cartRes, addressRes] = await Promise.all([
-        axios.get('/cart'),
-        axios.get('/addresses'),
+        axios.get("/cart"),
+        axios.get("/addresses"),
       ]);
-
       setCart(cartRes.data);
       setAddresses(addressRes.data);
-
-      // Auto-select default address
-      const defaultAddress = addressRes.data.find((addr: Address) => addr.is_default);
+      const defaultAddress = addressRes.data.find(
+        (addr: Address) => addr.is_default,
+      );
       if (defaultAddress) {
         setSelectedAddress(defaultAddress.id);
       }
     } catch (error) {
-      toast.error('Failed to load checkout data');
+      toast.error("Failed to load checkout data");
     } finally {
       setLoading(false);
     }
@@ -83,7 +98,7 @@ export default function CheckoutPage() {
     if (!cart) return 0;
     return cart.items.reduce(
       (sum, item) => sum + Number(item.product.price) * item.quantity,
-      0
+      0,
     );
   };
 
@@ -97,26 +112,26 @@ export default function CheckoutPage() {
 
   const applyDiscount = async () => {
     if (!discountCode.trim()) {
-      toast.error('Please enter a discount code');
+      toast.error("Please enter a discount code");
       return;
     }
-
     setDiscountLoading(true);
     try {
-      const { data } = await axios.post('/discounts/apply', {
+      const { data } = await axios.post("/discounts/apply", {
         code: discountCode,
         order_amount: calculateTotal(),
       });
-
       if (data.success) {
         setAppliedDiscount({
           code: data.discount.code,
           amount: data.discount_amount,
         });
-        toast.success(`Discount applied: Rp ${data.discount_amount.toLocaleString('id-ID')} off`);
+        toast.success(
+          `Discount applied: Rp ${data.discount_amount.toLocaleString("id-ID")} off`,
+        );
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Invalid discount code';
+      const message = error.response?.data?.message || "Invalid discount code";
       toast.error(message);
       setAppliedDiscount(null);
     } finally {
@@ -126,38 +141,51 @@ export default function CheckoutPage() {
 
   const removeDiscount = () => {
     setAppliedDiscount(null);
-    setDiscountCode('');
+    setDiscountCode("");
   };
 
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
-      toast.error('Please select a delivery address');
+      toast.error("Please select a delivery address");
       return;
     }
 
     if (!cart || cart.items.length === 0) {
-      toast.error('Your cart is empty');
+      toast.error("Your cart is empty");
       return;
     }
 
     setProcessing(true);
 
     try {
-      const orderData: any = {
+      // 🧾 1. CREATE ORDER
+      const orderPayload: any = {
         address_id: selectedAddress,
         notes,
       };
 
       if (appliedDiscount) {
-        orderData.discount_code = appliedDiscount.code;
+        orderPayload.discount_code = appliedDiscount.code;
       }
 
-      const { data } = await axios.post('/orders', orderData);
+      const { data: order } = await axios.post("/orders", orderPayload);
 
-      toast.success('Order placed successfully!');
-      router.push(`/orders/${data.id}`);
+      toast.success("Order created! Redirecting to payment...");
+
+      // 💳 2. CREATE INVOICE KE XENDIT
+      const { data: payment } = await axios.post(
+        `/payments/${order.id}/invoice`,
+      );
+
+      if (!payment.invoice_url) {
+        throw new Error("Invoice URL not found");
+      }
+
+      // 🚀 3. REDIRECT KE XENDIT
+      window.location.href = payment.invoice_url;
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to place order');
+      console.error(error);
+      toast.error(error.response?.data?.message || "Checkout failed");
     } finally {
       setProcessing(false);
     }
@@ -167,8 +195,11 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <div className="text-xl">Loading checkout...</div>
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-lime-600" />
+            <span className="text-gray-600">Loading checkout...</span>
+          </div>
         </div>
       </>
     );
@@ -178,15 +209,21 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-neutral-50">
-          <div className="container mx-auto px-4 py-8">
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <h2 className="text-2xl font-semibold mb-4 text-neutral-700">
+        <div className="min-h-screen bg-gray-50">
+          <div className="container mx-auto px-4 py-12">
+            <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-10 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-8 h-8 text-gray-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 Your cart is empty
               </h2>
+              <p className="text-gray-500 mb-6">
+                Add some products to get started
+              </p>
               <Link
                 href="/products"
-                className="inline-block bg-lime-600 text-white px-8 py-3 rounded-lg hover:bg-lime-700 transition"
+                className="inline-block bg-lime-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-lime-700 transition-colors"
               >
                 Browse Products
               </Link>
@@ -200,88 +237,105 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-neutral-50">
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold mb-8 text-neutral-700">Checkout</h1>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8 max-w-6xl">
+          <div className="flex items-center gap-3 mb-8">
+            <Link
+              href="/cart"
+              className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </Link>
+            <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
+          </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Delivery Address */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-neutral-700">
+          <div className="grid lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-8 space-y-5">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="p-2 bg-lime-100 rounded-lg">
+                    <MapPin className="w-5 h-5 text-lime-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">
                     Delivery Address
                   </h2>
-                  <Link
-                    href="/profile/addresses"
-                    className="text-lime-600 hover:underline text-sm"
-                  >
-                    + Add New Address
-                  </Link>
                 </div>
-
                 {addresses.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-neutral-600 mb-4">No addresses found</p>
+                    <p className="text-gray-500 mb-4">No addresses found</p>
                     <Link
                       href="/profile/addresses"
-                      className="inline-block bg-lime-600 text-white px-6 py-2 rounded-lg hover:bg-lime-700 transition"
+                      className="inline-block bg-lime-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-lime-700 transition-colors"
                     >
                       Add Address
                     </Link>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="grid gap-3">
                     {addresses.map((address) => (
-                      <label
+                      <button
                         key={address.id}
-                        className={`block p-4 border-2 rounded-lg cursor-pointer transition ${
+                        onClick={() => setSelectedAddress(address.id)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${
                           selectedAddress === address.id
-                            ? 'border-lime-500 bg-lime-50'
-                            : 'border-neutral-200 hover:border-neutral-300'
+                            ? "border-lime-500 bg-lime-50/50"
+                            : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        <input
-                          type="radio"
-                          name="address"
-                          value={address.id}
-                          checked={selectedAddress === address.id}
-                          onChange={(e) => setSelectedAddress(e.target.value)}
-                          className="mr-3"
-                        />
-                        <div className="inline-block">
-                          <p className="font-semibold">
-                            {address.label}{' '}
-                            {address.is_default && (
-                              <span className="text-xs bg-lime-500 text-white px-2 py-1 rounded ml-2">
-                                Default
-                              </span>
+                        <div className="flex items-start gap-3">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
+                              selectedAddress === address.id
+                                ? "border-lime-500 bg-lime-500"
+                                : "border-gray-300"
+                            }`}
+                          >
+                            {selectedAddress === address.id && (
+                              <Check className="w-3 h-3 text-white" />
                             )}
-                          </p>
-                          <p className="text-sm font-medium mt-1">
-                            {address.recipient_name} - {address.phone}
-                          </p>
-                          <p className="text-sm text-neutral-600 mt-1">
-                            {address.address}, {address.city}, {address.province}{' '}
-                            {address.postal_code}
-                          </p>
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-900">
+                                {address.label}
+                              </span>
+                              {address.is_default && (
+                                <span className="text-xs bg-lime-100 text-lime-700 px-2 py-0.5 rounded-full font-medium">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mt-0.5">
+                              {address.recipient_name} - {address.phone}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {address.address}, {address.city}{" "}
+                              {address.postal_code}
+                            </p>
+                          </div>
                         </div>
-                      </label>
+                      </button>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Order Items */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-neutral-700">
-                  Order Items
-                </h2>
-                <div className="space-y-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Package className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Order Items
+                  </h2>
+                </div>
+                <div className="space-y-3">
                   {cart.items.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4">
-                      <div className="w-20 h-20 bg-neutral-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl"
+                    >
+                      <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden border border-gray-200">
                         {item.product.image_url ? (
                           <img
                             src={item.product.image_url}
@@ -289,135 +343,151 @@ export default function CheckoutPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-3xl">📦</span>
+                          <Package className="w-6 h-6 text-gray-400" />
                         )}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{item.product.name}</h3>
-                        <p className="text-neutral-600">Qty: {item.quantity}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">
-                          Rp{' '}
-                          {(
-                            Number(item.product.price) * item.quantity
-                          ).toLocaleString('id-ID')}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-gray-900 truncate">
+                          {item.product.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          Qty: {item.quantity}
                         </p>
                       </div>
+                      <p className="font-semibold text-gray-900 whitespace-nowrap">
+                        Rp{" "}
+                        {Number(
+                          item.product.price * item.quantity,
+                        ).toLocaleString("id-ID")}
+                      </p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Notes */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4 text-neutral-700">
-                  Order Notes (Optional)
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h2 className="font-semibold text-gray-900 mb-4">
+                  Order Notes
                 </h2>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition resize-none"
                   rows={3}
-                  placeholder="Any special instructions for your order..."
+                  placeholder="Add notes for your order..."
                 />
               </div>
             </div>
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
-                <h2 className="text-xl font-bold mb-4 text-neutral-700">
+            <div className="lg:col-span-4">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sticky top-8">
+                <h2 className="text-xl font-bold text-gray-900 mb-5">
                   Order Summary
                 </h2>
 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Items ({cart.items.length})</span>
-                    <span className="font-semibold">
-                      Rp {calculateTotal().toLocaleString('id-ID')}
+                <div className="space-y-3 mb-5">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal ({cart.items.length} items)</span>
+                    <span className="font-medium">
+                      Rp {calculateTotal().toLocaleString("id-ID")}
                     </span>
                   </div>
-                  
-                  {/* Discount Input */}
+
                   {!appliedDiscount ? (
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={discountCode}
-                        onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setDiscountCode(e.target.value.toUpperCase())
+                        }
                         placeholder="Discount code"
-                        className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
+                        className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none"
                       />
                       <button
                         type="button"
                         onClick={applyDiscount}
                         disabled={discountLoading || !discountCode.trim()}
-                        className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-sm font-medium hover:bg-neutral-700 disabled:bg-neutral-400 transition"
+                        className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                       >
-                        {discountLoading ? '...' : 'Apply'}
+                        {discountLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          "Apply"
+                        )}
                       </button>
                     </div>
                   ) : (
-                    <div className="flex justify-between items-center bg-lime-50 p-2 rounded">
-                      <div>
-                        <span className="text-sm text-lime-700 font-medium">
+                    <div className="flex items-center justify-between bg-lime-50 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-lime-600" />
+                        <span className="text-sm font-medium text-lime-700">
                           {appliedDiscount.code}
-                        </span>
-                        <span className="text-sm text-lime-600 ml-2">
-                          -Rp {appliedDiscount.amount.toLocaleString('id-ID')}
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={removeDiscount}
-                        className="text-red-500 text-sm hover:underline"
+                        className="text-lime-600 hover:text-lime-700"
                       >
-                        Remove
+                        <X className="w-4 h-4" />
                       </button>
+                      <span className="text-sm text-lime-600">
+                        -Rp {appliedDiscount.amount.toLocaleString("id-ID")}
+                      </span>
                     </div>
                   )}
-                  
-                  <div className="flex justify-between">
-                    <span className="text-neutral-600">Shipping</span>
-                    <span className="font-semibold text-lime-600">FREE</span>
+
+                  <div className="flex justify-between text-gray-600">
+                    <span className="flex items-center gap-1">
+                      <Truck className="w-4 h-4" />
+                      Shipping
+                    </span>
+                    <span className="font-medium text-lime-600">Free</span>
                   </div>
-                  
-                  {appliedDiscount && (
-                    <div className="flex justify-between text-lime-600">
-                      <span>Discount</span>
-                      <span className="font-semibold">
-                        -Rp {appliedDiscount.amount.toLocaleString('id-ID')}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total</span>
-                      <span className="text-lime-600">
-                        Rp {calculateFinalTotal().toLocaleString('id-ID')}
-                      </span>
-                    </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 mb-5">
+                  <div className="flex justify-between text-xl font-bold">
+                    <span className="text-gray-900">Total</span>
+                    <span className="text-lime-600">
+                      Rp {calculateFinalTotal().toLocaleString("id-ID")}
+                    </span>
                   </div>
                 </div>
 
                 <button
                   onClick={handlePlaceOrder}
                   disabled={processing || !selectedAddress}
-                  className="w-full bg-lime-600 text-white py-3 rounded-lg font-semibold hover:bg-lime-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
+                  className="w-full bg-lime-600 text-white py-4 rounded-xl font-semibold hover:bg-lime-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
                 >
-                  {processing ? 'Processing...' : 'Place Order'}
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Place Order"
+                  )}
                 </button>
 
-                <p className="text-xs text-neutral-500 mt-4 text-center">
-                  By placing an order, you agree to our terms and conditions
-                </p>
+                <Link
+                  href="/products"
+                  className="block w-full mt-3 bg-gray-100 text-gray-700 text-center py-3 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                >
+                  Continue Shopping
+                </Link>
+
+                <div className="flex items-center justify-center gap-1 mt-4 text-xs text-gray-500">
+                  <Shield className="w-3 h-3" />
+                  <span>Secured by Xendit</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <Footer />
     </>
   );
 }

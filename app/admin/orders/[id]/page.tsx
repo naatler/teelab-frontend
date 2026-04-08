@@ -11,6 +11,7 @@ import {
   FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiClock, 
   FiCreditCard, FiMapPin, FiUser, FiShoppingBag 
 } from 'react-icons/fi';
+import PageTransition, { FadeIn } from '@/app/components/PageTransition';
 
 interface OrderItem {
   id: string;
@@ -86,9 +87,10 @@ export default function AdminOrderDetailPage() {
 
   const fetchOrder = async () => {
     try {
-      const { data } = await axios.get(`/orders/${id}`);
+      const { data } = await axios.get(`/admin/orders/${id}`);
       setOrder(data);
     } catch (error) {
+      console.error('Failed to load order:', error);
       toast.error('Failed to load order');
       router.push('/admin/orders');
     } finally {
@@ -99,7 +101,7 @@ export default function AdminOrderDetailPage() {
   const updateStatus = async (status: string) => {
     setUpdating(true);
     try {
-      await axios.patch(`/orders/${id}/status`, { status });
+      await axios.patch(`/admin/orders/${id}/status`, { status });
       toast.success('Order status updated!');
       fetchOrder();
     } catch (error) {
@@ -171,27 +173,30 @@ export default function AdminOrderDetailPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-neutral-50 py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <Link
-                href="/admin/orders"
-                className="flex items-center gap-2 text-neutral-500 hover:text-lime-600 mb-2"
-              >
-                <FiArrowLeft size={18} />
-                <span>Back to Orders</span>
-              </Link>
-              <h1 className="text-3xl font-bold text-neutral-800">
-                Order Details
-              </h1>
-              <p className="text-neutral-500 mt-1">
-                Order #{order.id.slice(0, 8)} • {new Date(order.created_at).toLocaleDateString('id-ID', { 
-                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
-                })}
-              </p>
-            </div>
-          </div>
+      <PageTransition>
+        <div className="min-h-screen bg-neutral-50 py-8">
+          <div className="container mx-auto px-4 max-w-6xl">
+            <FadeIn>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <Link
+                    href="/admin/orders"
+                    className="flex items-center gap-2 text-neutral-500 hover:text-lime-600 mb-2"
+                  >
+                    <FiArrowLeft size={18} />
+                    <span>Back to Orders</span>
+                  </Link>
+                  <h1 className="text-3xl font-bold text-neutral-800">
+                    Order Details
+                  </h1>
+                  <p className="text-neutral-500 mt-1">
+                    Order #{order.id.slice(0, 8)} • {new Date(order.created_at).toLocaleDateString('id-ID', { 
+                      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              </div>
+            </FadeIn>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -388,7 +393,9 @@ export default function AdminOrderDetailPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </PageTransition>
+      
     </>
   );
 }

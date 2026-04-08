@@ -7,7 +7,8 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
-import { FiEye, FiPackage, FiTruck, FiCheck, FiX, FiClock, FiSearch, FiFilter, FiShoppingBag } from 'react-icons/fi';
+import { FiEye, FiPackage, FiTruck, FiCheck, FiX, FiClock, FiSearch, FiShoppingBag } from 'react-icons/fi';
+import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from '@/app/components/PageTransition';
 
 interface Order {
   id: string;
@@ -36,8 +37,15 @@ export default function AdminOrdersPage() {
   const [pagination, setPagination] = useState<any>(null);
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     if (!user) {
       router.push('/login');
       return;
@@ -47,7 +55,7 @@ export default function AdminOrdersPage() {
       return;
     }
     fetchOrders();
-  }, [user, filter]);
+  }, [user, mounted, filter]);
 
   const fetchOrders = async (page = 1) => {
     setLoading(true);
@@ -56,7 +64,7 @@ export default function AdminOrdersPage() {
       if (filter) params.status = filter;
       if (search) params.search = search;
       
-      const { data } = await axios.get('/orders', { params });
+      const { data } = await axios.get('/admin/orders', { params });
       setOrders(data.data);
       setPagination({
         current_page: data.current_page,
@@ -124,13 +132,16 @@ export default function AdminOrdersPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <div className="min-h-screen bg-neutral-50 py-8">
         <div className="container mx-auto px-4 max-w-6xl">
           {/* Header */}
+          <FadeIn>
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-neutral-800">Orders Management</h1>
             <p className="text-neutral-500 mt-1">Monitor and manage customer orders</p>
           </div>
+          </FadeIn>
 
           {/* Filters Bar */}
           <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4 mb-6">
@@ -362,6 +373,7 @@ export default function AdminOrdersPage() {
           )}
         </div>
       </div>
+      </PageTransition>
     </>
   );
 }

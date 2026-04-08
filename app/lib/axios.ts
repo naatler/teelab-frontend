@@ -2,40 +2,52 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '',
   headers: {
-    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
-  withCredentials: false,
+  withCredentials: true,
 });
 
-// Add token to every request
-axiosInstance.interceptors.request.use((config) => {
-  const token = Cookies.get('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ✅ REQUEST INTERCEPTOR
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get('token');
 
-// Handle response errors
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// ✅ RESPONSE INTERCEPTOR
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const originalRequest = error.config;
-    
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+      console.error('Auth error:', status);
+
+      // hapus auth
       Cookies.remove('token');
-      
-      const currentPath = window.location.pathname;
-      if (!currentPath.startsWith('/login') && !currentPath.startsWith('/register')) {
-        window.location.href = '/login';
+      localStorage.removeItem('auth-storage');
+
+      // redirect login
+      if (typeof window !== 'undefined') {
+        const path = window.location.pathname;
+        if (!path.startsWith('/login') && !path.startsWith('/register')) {
+          window.location.href = '/login';
+        }
       }
     }
+
     return Promise.reject(error);
   }
 );
 
-export default axiosInstance;
+export default axiosInstance; 
