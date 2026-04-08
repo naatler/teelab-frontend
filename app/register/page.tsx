@@ -80,7 +80,7 @@ export default function RegisterPage() {
                 setFormData({ ...formData, name: e.target.value })
               }
               placeholder="Your Name"
-              className="w-full px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-3 text-black border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
 
@@ -96,7 +96,7 @@ export default function RegisterPage() {
                 setFormData({ ...formData, email: e.target.value })
               }
               placeholder="your@email.com"
-              className="w-full px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-3 text-black border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
 
@@ -111,7 +111,7 @@ export default function RegisterPage() {
                 setFormData({ ...formData, phone: e.target.value })
               }
               placeholder="08123456789"
-              className="w-full px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-3 text-black border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
 
@@ -127,7 +127,7 @@ export default function RegisterPage() {
                 setFormData({ ...formData, password: e.target.value })
               }
               placeholder="••••••••"
-              className="w-full px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-3 text-black border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
 
@@ -143,22 +143,22 @@ export default function RegisterPage() {
                 setFormData({ ...formData, confirmPassword: e.target.value })
               }
               placeholder="••••••••"
-              className="w-full px-4 py-3 text-black border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-400"
+              className="w-full px-4 py-3 text-black border border-neutral-300 rounded-full focus:outline-none focus:ring-2 focus:ring-lime-400"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-full font-semibold transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="w-full bg-lime-500 hover:bg-lime-600 text-white py-3 rounded-full font-semibold transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
           >
             {loading ? 'Loading...' : 'Create an Account'}
           </button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600 text-sm">
+        <p className="text-center mt-6 text-neutral-600 text-sm">
           Already have an account?{' '}
-          <Link href="/login" className="text-green-500 hover:underline">
+          <Link href="/login" className="text-lime-500 hover:underline">
             Sign in here
           </Link>
         </p>

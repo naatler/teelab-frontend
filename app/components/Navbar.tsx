@@ -37,7 +37,7 @@ export default function Navbar() {
           </div>
           <div className="hidden md:flex items-center w-full px-28">
             <Link
-              href="/"
+              href="/landingpage"
               className="text-neutral-200 relative group"
             >
               Home
@@ -67,7 +67,7 @@ export default function Navbar() {
               >
                 <BsHandbag size={24} color="rgb(229, 231, 235)" />
                 {items.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 bg-lime-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
                     {items.length}
                   </span>
                 )}
@@ -94,13 +94,29 @@ export default function Navbar() {
               {openMenu && user && (
                 <div className="absolute right-0 mt-2 w-40 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg text-neutral-200">
                   {user.role === 'admin' && (
-                    <Link
-                      href="/admin/categories"
-                      className="block px-4 py-2 text-sm hover:bg-neutral-800 rounded-t-lg"
-                      onClick={() => setOpenMenu(false)}
-                    >
-                      Admin Panel
-                    </Link>
+                    <>
+                      <Link
+                        href="/admin/products"
+                        className="block px-4 py-2 text-sm hover:bg-neutral-800"
+                        onClick={() => setOpenMenu(false)}
+                      >
+                        Products
+                      </Link>
+                      <Link
+                        href="/admin/orders"
+                        className="block px-4 py-2 text-sm hover:bg-neutral-800"
+                        onClick={() => setOpenMenu(false)}
+                      >
+                        Orders
+                      </Link>
+                      <Link
+                        href="/admin/categories"
+                        className="block px-4 py-2 text-sm hover:bg-neutral-800"
+                        onClick={() => setOpenMenu(false)}
+                      >
+                        Categories
+                      </Link>
+                    </>
                   )}
                   <Link
                     href="/profile/addresses"

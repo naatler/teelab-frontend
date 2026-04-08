@@ -135,7 +135,7 @@ export default function AddressesPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-xl">Loading...</div>
         </div>
       </>
@@ -145,13 +145,13 @@ export default function AddressesPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold text-neutral-700">My Addresses</h1>
             <button
               onClick={openCreateModal}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition"
+              className="bg-lime-600 text-white px-6 py-3 rounded-lg hover:bg-lime-700 transition"
             >
               + Add New Address
             </button>
@@ -163,10 +163,10 @@ export default function AddressesPage() {
               <h2 className="text-2xl font-semibold mb-2 text-neutral-700">
                 No addresses yet
               </h2>
-              <p className="text-gray-600 mb-6">Add your delivery address</p>
+              <p className="text-neutral-600 mb-6">Add your delivery address</p>
               <button
                 onClick={openCreateModal}
-                className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700/ transition"
+                className="bg-lime-600 text-white px-8 py-3 rounded-lg hover:bg-lime-700/ transition"
               >
                 Add Address
               </button>
@@ -177,11 +177,11 @@ export default function AddressesPage() {
                 <div
                   key={address.id}
                   className={`bg-white rounded-lg shadow-md p-6 relative ${
-                    address.is_default ? 'ring-2 ring-green-500' : ''
+                    address.is_default ? 'ring-2 ring-lime-500' : ''
                   }`}
                 >
                   {address.is_default && (
-                    <span className="absolute top-4 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded-full">
+                    <span className="absolute top-4 right-4 bg-lime-500 text-white text-xs px-3 py-1 rounded-full">
                       Default
                     </span>
                   )}
@@ -190,9 +190,9 @@ export default function AddressesPage() {
                     {address.label}
                   </h3>
                   <p className="font-semibold mb-1">{address.recipient_name}</p>
-                  <p className="text-gray-600 text-sm mb-2">{address.phone}</p>
-                  <p className="text-gray-700 mb-2">{address.address}</p>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-neutral-600 text-sm mb-2">{address.phone}</p>
+                  <p className="text-neutral-700 mb-2">{address.address}</p>
+                  <p className="text-neutral-600 text-sm">
                     {address.city}, {address.province} {address.postal_code}
                   </p>
 
@@ -200,7 +200,7 @@ export default function AddressesPage() {
                     {!address.is_default && (
                       <button
                         onClick={() => setDefaultAddress(address.id)}
-                        className="flex-1 bg-green-500 text-white py-2 rounded hover:bg-green-600 text-sm transition"
+                        className="flex-1 bg-lime-500 text-white py-2 rounded hover:bg-lime-600 text-sm transition"
                       >
                         Set Default
                       </button>
@@ -235,7 +235,7 @@ export default function AddressesPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Label (e.g., Home, Office)
                 </label>
                 <input
@@ -245,14 +245,14 @@ export default function AddressesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, label: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                   placeholder="Home"
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Recipient Name
                   </label>
                   <input
@@ -262,13 +262,13 @@ export default function AddressesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, recipient_name: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                     placeholder="John Doe"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Phone Number
                   </label>
                   <input
@@ -278,14 +278,14 @@ export default function AddressesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                     placeholder="08123456789"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Full Address
                 </label>
                 <textarea
@@ -294,7 +294,7 @@ export default function AddressesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, address: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                   rows={3}
                   placeholder="Street address, building, apartment, etc."
                 />
@@ -302,7 +302,7 @@ export default function AddressesPage() {
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     City
                   </label>
                   <input
@@ -312,13 +312,13 @@ export default function AddressesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, city: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                     placeholder="Jakarta"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Province
                   </label>
                   <input
@@ -328,13 +328,13 @@ export default function AddressesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, province: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                     placeholder="DKI Jakarta"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
                     Postal Code
                   </label>
                   <input
@@ -344,7 +344,7 @@ export default function AddressesPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, postal_code: e.target.value })
                     }
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                     placeholder="12345"
                   />
                 </div>
@@ -357,9 +357,9 @@ export default function AddressesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, is_default: e.target.checked })
                   }
-                  className="w-4 h-4 text-green-600"
+                  className="w-4 h-4 text-lime-600"
                 />
-                <label className="ml-2 text-sm text-gray-700">
+                <label className="ml-2 text-sm text-neutral-700">
                   Set as default address
                 </label>
               </div>
@@ -371,13 +371,13 @@ export default function AddressesPage() {
                     setShowModal(false);
                     resetForm();
                   }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition"
+                  className="flex-1 bg-neutral-300 text-neutral-700 py-2 rounded-lg hover:bg-neutral-400 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+                  className="flex-1 bg-lime-600 text-white py-2 rounded-lg hover:bg-lime-700 transition"
                 >
                   {editingAddress ? 'Update' : 'Add'} Address
                 </button>

@@ -109,7 +109,7 @@ export default function CartPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-xl">Loading cart...</div>
         </div>
       </>
@@ -119,7 +119,7 @@ export default function CartPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-4xl font-bold text-neutral-700">Shopping Cart</h1>
@@ -139,12 +139,12 @@ export default function CartPage() {
               <h2 className="text-2xl font-semibold mb-2 text-neutral-700">
                 Your cart is empty
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-neutral-600 mb-6">
                 Add some products to get started
               </p>
               <Link
                 href="/products"
-                className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition"
+                className="inline-block bg-lime-600 text-white px-8 py-3 rounded-lg hover:bg-lime-700 transition"
               >
                 Browse Products
               </Link>
@@ -158,7 +158,7 @@ export default function CartPage() {
                       key={item.id}
                       className="flex items-center gap-4 p-6"
                     >
-                      <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <div className="w-24 h-24 bg-neutral-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {item.product.image_url ? (
                           <img
                             src={item.product.image_url}
@@ -174,10 +174,10 @@ export default function CartPage() {
                         <h3 className="font-semibold text-lg mb-1">
                           {item.product.name}
                         </h3>
-                        <p className="text-green-600 font-bold text-xl">
+                        <p className="text-lime-600 font-bold text-xl">
                           Rp {Number(item.product.price).toLocaleString('id-ID')}
                         </p>
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-neutral-600 mt-1">
                           Stock: {item.product.stock}
                         </p>
                       </div>
@@ -188,7 +188,7 @@ export default function CartPage() {
                             updateQuantity(item.id, item.quantity - 1)
                           }
                           disabled={item.quantity <= 1}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-8 h-8 bg-neutral-200 rounded hover:bg-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           -
                         </button>
@@ -200,7 +200,7 @@ export default function CartPage() {
                             updateQuantity(item.id, item.quantity + 1)
                           }
                           disabled={item.quantity >= item.product.stock}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-8 h-8 bg-neutral-200 rounded hover:bg-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           +
                         </button>
@@ -233,11 +233,11 @@ export default function CartPage() {
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Items</span>
+                      <span className="text-neutral-600">Items</span>
                       <span className="font-semibold">{cart.items.length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Subtotal</span>
+                      <span className="text-neutral-600">Subtotal</span>
                       <span className="font-semibold">
                         Rp {calculateTotal().toLocaleString('id-ID')}
                       </span>
@@ -245,7 +245,7 @@ export default function CartPage() {
                     <div className="border-t pt-3">
                       <div className="flex justify-between text-lg font-bold">
                         <span>Total</span>
-                        <span className="text-green-600">
+                        <span className="text-lime-600">
                           Rp {calculateTotal().toLocaleString('id-ID')}
                         </span>
                       </div>
@@ -254,14 +254,14 @@ export default function CartPage() {
 
                   <button
                     onClick={handleCheckout}
-                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                    className="w-full bg-lime-600 text-white py-3 rounded-lg font-semibold hover:bg-lime-700 transition"
                   >
                     Proceed to Checkout
                   </button>
 
                   <Link
                     href="/products"
-                    className="block w-full mt-3 bg-gray-200 text-gray-700 text-center py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+                    className="block w-full mt-3 bg-neutral-200 text-neutral-700 text-center py-3 rounded-lg font-semibold hover:bg-neutral-300 transition"
                   >
                     Continue Shopping
                   </Link>

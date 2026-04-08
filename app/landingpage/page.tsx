@@ -1,8 +1,49 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
 import { ShoppingBag } from "lucide-react";
+import axios from '@/app/lib/axios';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string | null;
+  category: Category;
+}
 
 export default function Home() {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [categoriesRes, productsRes] = await Promise.all([
+        axios.get('/categories'),
+        axios.get('/products'),
+      ]);
+      setCategories(categoriesRes.data);
+      setProducts(productsRes.data.slice(0, 8));  
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="overflow-x-hidden">
       <main className="relative py-20">
@@ -86,55 +127,88 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="category" className="bg-white min-h-[800px] py-10">
+      <section id="category" className="bg-white min-h-screen py-10">
         <div className="container mx-auto px-4">
           <p className="text-center text-neutral-500 border-2 border-neutral-500 rounded-full py-2 max-w-[130px] mb-8">
             Category
           </p>
-          <h2 className="text-4xl font-bold text-neutral-700 mb-2">
+          <h2 className="text-5xl font-medium text-neutral-700 mb-2">
             Top-Quality Golf Equipment for
           </h2>
-          <h3 className="text-4xl font-bold text-green-600 mb-12">
+          <h3 className="text-5xl font-medium text-neutral-400 mb-12">
             Every Game!
           </h3>
-          <Link
-            href="/products"
-            className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition"
-          >
-            Browse All Products
-          </Link>
+
+          {!loading && categories.length > 0 && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={`/products?category=${category.id}`}
+                  className="bg-neutral-100 hover:bg-neutral-200 p-6 rounded-xl text-center transition"
+                >
+                  <h4 className="text-lg font-semibold text-neutral-700">{category.name}</h4>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-neutral-700 mb-6">Featured Products</h3>
+            {loading ? (
+              <div className="text-center py-12 text-neutral-500">Loading products...</div>
+            ) : products.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {products.map((product) => (
+                  <Link
+                    key={product.id}
+                    href={`/products/${product.id}`}
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group"
+                  >
+                    <div className="relative h-48 bg-neutral-200 overflow-hidden">
+                      {product.image_url ? (
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-neutral-400 text-4xl">
+                          📦
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="text-xs text-neutral-500 mb-1">
+                        {product.category?.name}
+                      </p>
+                      <h4 className="font-semibold text-neutral-700 mb-2 truncate">
+                        {product.name}
+                      </h4>
+                      <p className="text-lime-600 font-bold">
+                        Rp {Number(product.price).toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-neutral-500">No products available</div>
+            )}
+          </div>
+
+          <div className="text-center">
+            <Link
+              href="/products"
+              className="inline-block bg-lime-600 text-white px-8 py-3 rounded-full hover:bg-lime-700 transition"
+            >
+              Browse All Products
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-neutral-900 text-neutral-300 py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-white text-xl font-bold mb-6">Contact Us</h3>
-              <div className="space-y-4">
-                <p>Phone: +62 851-6101-9999</p>
-                <p>Email: teelab@gmail.com</p>
-                <p>Address: Jawa Timur, Indonesia</p>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-white text-xl font-bold mb-6">Quick Links</h3>
-              <div className="space-y-2">
-                <Link href="/" className="block hover:text-white">
-                  Home
-                </Link>
-                <Link href="/products" className="block hover:text-white">
-                  Shop Now
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-neutral-800 mt-8 pt-8 text-center">
-            <p className="text-sm">© 2024 TeeLab - Where golf meets everyday lifestyle</p>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 }

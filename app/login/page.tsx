@@ -63,7 +63,7 @@ export default function LoginPage() {
                 setFormData({ ...formData, email: e.target.value })
               }
               placeholder="Enter your email"
-              className="w-full rounded-full text-neutral-700 border border-gray-300 px-4 py-2 sm:py-3 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="w-full rounded-full text-neutral-700 border border-neutral-300 px-4 py-2 sm:py-3 focus:outline-none focus:ring-2 focus:ring-lime-400 text-sm sm:text-base"
             />
           </div>
 
@@ -79,12 +79,12 @@ export default function LoginPage() {
                 setFormData({ ...formData, password: e.target.value })
               }
               placeholder="Enter your password"
-              className="w-full rounded-full text-neutral-700 border border-gray-300 px-4 py-2 sm:py-3 focus:outline-none focus:ring-2 focus:ring-green-400 text-sm sm:text-base"
+              className="w-full rounded-full text-neutral-700 border border-neutral-300 px-4 py-2 sm:py-3 focus:outline-none focus:ring-2 focus:ring-lime-400 text-sm sm:text-base"
             />
             <div className="text-right mt-1">
               <a
                 href="#"
-                className="text-[11px] sm:text-sm text-gray-500 hover:text-green-500"
+                className="text-[11px] sm:text-sm text-neutral-500 hover:text-lime-500"
               >
                 Forgot password?
               </a>
@@ -94,15 +94,15 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-green-400 hover:bg-green-500 text-white py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full bg-lime-500 hover:bg-lime-600 text-white py-2 sm:py-3 rounded-full text-sm sm:text-lg font-medium transition disabled:bg-neutral-400 disabled:cursor-not-allowed"
               >
                 {loading ? 'Loading...' : 'Sign in'}
               </button>
             </form>
     
-            <p className="text-[11px] sm:text-sm text-center text-gray-600 mt-4 sm:mt-6">
+            <p className="text-[11px] sm:text-sm text-center text-neutral-600 mt-4 sm:mt-6">
               Don't have an account?{' '}
-              <Link href="/register" className="text-green-500 hover:underline">
+              <Link href="/register" className="text-lime-500 hover:underline">
                 Sign up
               </Link>
             </p>

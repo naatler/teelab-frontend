@@ -167,7 +167,7 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
           <div className="text-xl">Loading checkout...</div>
         </div>
       </>
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-neutral-50">
           <div className="container mx-auto px-4 py-8">
             <div className="bg-white rounded-lg shadow-md p-12 text-center">
               <h2 className="text-2xl font-semibold mb-4 text-neutral-700">
@@ -186,7 +186,7 @@ export default function CheckoutPage() {
               </h2>
               <Link
                 href="/products"
-                className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition"
+                className="inline-block bg-lime-600 text-white px-8 py-3 rounded-lg hover:bg-lime-700 transition"
               >
                 Browse Products
               </Link>
@@ -200,7 +200,7 @@ export default function CheckoutPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-4xl font-bold mb-8 text-neutral-700">Checkout</h1>
 
@@ -215,7 +215,7 @@ export default function CheckoutPage() {
                   </h2>
                   <Link
                     href="/profile/addresses"
-                    className="text-green-600 hover:underline text-sm"
+                    className="text-lime-600 hover:underline text-sm"
                   >
                     + Add New Address
                   </Link>
@@ -223,10 +223,10 @@ export default function CheckoutPage() {
 
                 {addresses.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-gray-600 mb-4">No addresses found</p>
+                    <p className="text-neutral-600 mb-4">No addresses found</p>
                     <Link
                       href="/profile/addresses"
-                      className="inline-block bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition"
+                      className="inline-block bg-lime-600 text-white px-6 py-2 rounded-lg hover:bg-lime-700 transition"
                     >
                       Add Address
                     </Link>
@@ -238,8 +238,8 @@ export default function CheckoutPage() {
                         key={address.id}
                         className={`block p-4 border-2 rounded-lg cursor-pointer transition ${
                           selectedAddress === address.id
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            ? 'border-lime-500 bg-lime-50'
+                            : 'border-neutral-200 hover:border-neutral-300'
                         }`}
                       >
                         <input
@@ -254,7 +254,7 @@ export default function CheckoutPage() {
                           <p className="font-semibold">
                             {address.label}{' '}
                             {address.is_default && (
-                              <span className="text-xs bg-green-500 text-white px-2 py-1 rounded ml-2">
+                              <span className="text-xs bg-lime-500 text-white px-2 py-1 rounded ml-2">
                                 Default
                               </span>
                             )}
@@ -262,7 +262,7 @@ export default function CheckoutPage() {
                           <p className="text-sm font-medium mt-1">
                             {address.recipient_name} - {address.phone}
                           </p>
-                          <p className="text-sm text-gray-600 mt-1">
+                          <p className="text-sm text-neutral-600 mt-1">
                             {address.address}, {address.city}, {address.province}{' '}
                             {address.postal_code}
                           </p>
@@ -281,7 +281,7 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   {cart.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-4">
-                      <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <div className="w-20 h-20 bg-neutral-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                         {item.product.image_url ? (
                           <img
                             src={item.product.image_url}
@@ -294,7 +294,7 @@ export default function CheckoutPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-semibold">{item.product.name}</h3>
-                        <p className="text-gray-600">Qty: {item.quantity}</p>
+                        <p className="text-neutral-600">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-bold">
@@ -317,7 +317,7 @@ export default function CheckoutPage() {
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:outline-none"
                   rows={3}
                   placeholder="Any special instructions for your order..."
                 />
@@ -333,7 +333,7 @@ export default function CheckoutPage() {
 
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Items ({cart.items.length})</span>
+                    <span className="text-neutral-600">Items ({cart.items.length})</span>
                     <span className="font-semibold">
                       Rp {calculateTotal().toLocaleString('id-ID')}
                     </span>
@@ -347,24 +347,24 @@ export default function CheckoutPage() {
                         value={discountCode}
                         onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                         placeholder="Discount code"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm"
                       />
                       <button
                         type="button"
                         onClick={applyDiscount}
                         disabled={discountLoading || !discountCode.trim()}
-                        className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 disabled:bg-gray-400 transition"
+                        className="px-4 py-2 bg-neutral-800 text-white rounded-lg text-sm font-medium hover:bg-neutral-700 disabled:bg-neutral-400 transition"
                       >
                         {discountLoading ? '...' : 'Apply'}
                       </button>
                     </div>
                   ) : (
-                    <div className="flex justify-between items-center bg-green-50 p-2 rounded">
+                    <div className="flex justify-between items-center bg-lime-50 p-2 rounded">
                       <div>
-                        <span className="text-sm text-green-700 font-medium">
+                        <span className="text-sm text-lime-700 font-medium">
                           {appliedDiscount.code}
                         </span>
-                        <span className="text-sm text-green-600 ml-2">
+                        <span className="text-sm text-lime-600 ml-2">
                           -Rp {appliedDiscount.amount.toLocaleString('id-ID')}
                         </span>
                       </div>
@@ -379,12 +379,12 @@ export default function CheckoutPage() {
                   )}
                   
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-semibold text-green-600">FREE</span>
+                    <span className="text-neutral-600">Shipping</span>
+                    <span className="font-semibold text-lime-600">FREE</span>
                   </div>
                   
                   {appliedDiscount && (
-                    <div className="flex justify-between text-green-600">
+                    <div className="flex justify-between text-lime-600">
                       <span>Discount</span>
                       <span className="font-semibold">
                         -Rp {appliedDiscount.amount.toLocaleString('id-ID')}
@@ -395,7 +395,7 @@ export default function CheckoutPage() {
                   <div className="border-t pt-3">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span className="text-green-600">
+                      <span className="text-lime-600">
                         Rp {calculateFinalTotal().toLocaleString('id-ID')}
                       </span>
                     </div>
@@ -405,12 +405,12 @@ export default function CheckoutPage() {
                 <button
                   onClick={handlePlaceOrder}
                   disabled={processing || !selectedAddress}
-                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+                  className="w-full bg-lime-600 text-white py-3 rounded-lg font-semibold hover:bg-lime-700 disabled:bg-neutral-400 disabled:cursor-not-allowed transition"
                 >
                   {processing ? 'Processing...' : 'Place Order'}
                 </button>
 
-                <p className="text-xs text-gray-500 mt-4 text-center">
+                <p className="text-xs text-neutral-500 mt-4 text-center">
                   By placing an order, you agree to our terms and conditions
                 </p>
               </div>

@@ -54,14 +54,14 @@ export default function OrdersPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
           <h1 className="text-4xl font-bold mb-8 text-neutral-700">My Orders</h1>
 
           {orders.length === 0 ? (
             <div className="bg-white p-12 text-center rounded-lg shadow">
               <p className="mb-4">No orders yet</p>
-              <Link href="/products" className="text-green-600">
+              <Link href="/products" className="text-lime-600">
                 Start shopping
               </Link>
             </div>
@@ -76,13 +76,13 @@ export default function OrdersPage() {
                   <div className="flex justify-between">
                     <div>
                       <p className="font-bold">Order #{order.id}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-neutral-500">
                         {new Date(order.created_at).toLocaleString()}
                       </p>
                     </div>
 
                     <div className="text-right">
-                      <p className="font-bold text-green-600">
+                      <p className="font-bold text-lime-600">
                         Rp {Number(order.total_amount).toLocaleString('id-ID')}
                       </p>
                       <p className="text-sm capitalize">{order.status}</p>
