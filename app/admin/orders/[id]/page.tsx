@@ -7,7 +7,10 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
-import { FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiClock, FiCreditCard } from 'react-icons/fi';
+import { 
+  FiArrowLeft, FiPackage, FiTruck, FiCheck, FiX, FiClock, 
+  FiCreditCard, FiMapPin, FiUser, FiShoppingBag 
+} from 'react-icons/fi';
 
 interface OrderItem {
   id: string;
@@ -27,7 +30,6 @@ interface Order {
   discount_amount: number;
   notes: string;
   created_at: string;
-  updated_at: string;
   user: {
     id: string;
     name: string;
@@ -59,6 +61,8 @@ interface Order {
     value: number;
   } | null;
 }
+
+const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams();
@@ -118,21 +122,21 @@ export default function AdminOrderDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'processing': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-300';
-      case 'delivered': return 'bg-lime-100 text-lime-800 border-lime-300';
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-300';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'processing': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'delivered': return 'bg-lime-100 text-lime-800 border-lime-200';
+      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
     }
   };
 
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-lime-100 text-lime-800 border-lime-300';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
-      case 'expired': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-neutral-100 text-neutral-800 border-neutral-300';
+      case 'paid': return 'bg-lime-100 text-lime-800 border-lime-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'expired': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
     }
   };
 
@@ -141,7 +145,13 @@ export default function AdminOrderDetailPage() {
       <>
         <Navbar />
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <div className="text-xl">Loading...</div>
+          <div className="flex items-center gap-3">
+            <svg className="animate-spin h-6 w-6 text-lime-600" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="text-neutral-600">Loading order...</span>
+          </div>
         </div>
       </>
     );
@@ -158,94 +168,89 @@ export default function AdminOrderDetailPage() {
     );
   }
 
-  const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
-
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-neutral-50 py-8">
-        <div className="container mx-auto px-4">
-          <Link
-            href="/admin/orders"
-            className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 mb-6"
-          >
-            <FiArrowLeft /> Back to Orders
-          </Link>
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <Link
+                href="/admin/orders"
+                className="flex items-center gap-2 text-neutral-500 hover:text-lime-600 mb-2"
+              >
+                <FiArrowLeft size={18} />
+                <span>Back to Orders</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-neutral-800">
+                Order Details
+              </h1>
+              <p className="text-neutral-500 mt-1">
+                Order #{order.id.slice(0, 8)} • {new Date(order.created_at).toLocaleDateString('id-ID', { 
+                  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+                })}
+              </p>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Order Status Card */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-neutral-800">
-                      Order #{order.id.slice(0, 8)}
-                    </h1>
-                    <p className="text-sm text-neutral-500">
-                      {new Date(order.created_at).toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${getStatusColor(order.status)}`}>
-                    {getStatusIcon(order.status)}
-                    <span className="font-medium capitalize">{order.status}</span>
-                  </span>
-                </div>
-
-                {/* Status Timeline */}
-                <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <h2 className="text-lg font-semibold text-neutral-800 mb-4">Order Status</h2>
+                
+                <div className="flex items-center gap-2 mb-6 flex-wrap">
                   {statusOptions.map((status, index) => {
                     const statusIndex = statusOptions.indexOf(order.status);
                     const isActive = index <= statusIndex;
                     const isCurrent = status === order.status;
                     
                     return (
-                      <div key={status} className="flex items-center">
+                      <div key={status} className="flex items-center overflow-hidden">
                         <button
                           onClick={() => updateStatus(status)}
                           disabled={updating}
-                          className={`px-3 py-1 rounded-full text-xs font-medium border transition ${
+                          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm  border transition-all${
                             isCurrent
                               ? getStatusColor(status)
                               : isActive
-                                ? 'bg-neutral-200 text-neutral-700 border-neutral-300'
+                                ? 'bg-neutral-100 text-neutral-700 border-neutral-300'
                                 : 'bg-neutral-50 text-neutral-400 border-neutral-200'
                           } ${!isCurrent ? 'hover:bg-neutral-100' : ''}`}
                         >
-                          {status}
+                          {getStatusIcon(status)}
+                          <span className="ml-1.5 capitalize">{status}</span>
                         </button>
                         {index < statusOptions.length - 1 && (
-                          <div className={`w-4 h-0.5 mx-1 ${index < statusIndex ? 'bg-neutral-300' : 'bg-neutral-200'}`} />
+                          <div className={`w-8 h-0.5 mx-1 ${index < statusIndex ? 'bg-lime-400' : 'bg-neutral-200'}`} />
                         )}
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Order Items */}
-                <div className="border-t pt-4">
-                  <h2 className="font-semibold mb-3">Order Items</h2>
-                  <div className="space-y-3">
+                <div className="border-t border-neutral-200 pt-6">
+                  <h3 className="font-semibold text-neutral-800 mb-4">Order Items</h3>
+                  <div className="space-y-4">
                     {order.items.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center p-3 bg-neutral-50 rounded">
-                        <div className="flex items-center gap-3">
+                      <div key={item.id} className="flex justify-between items-center p-4 bg-neutral-50 rounded-xl">
+                        <div className="flex items-center gap-4">
                           {item.product.image_url ? (
                             <img
                               src={item.product.image_url}
                               alt={item.product.name}
-                              className="w-16 h-16 object-cover rounded"
+                              className="w-16 h-16 object-cover rounded-lg"
                             />
                           ) : (
-                            <div className="w-16 h-16 bg-neutral-200 rounded flex items-center justify-center">
-                              📦
+                            <div className="w-16 h-16 bg-neutral-200 rounded-lg flex items-center justify-center">
+                              <FiShoppingBag className="text-neutral-400 text-xl" />
                             </div>
                           )}
                           <div>
-                            <p className="font-medium">{item.product.name}</p>
-                            <p className="text-sm text-neutral-500">Qty: {item.quantity}</p>
+                            <p className="font-medium text-neutral-800">{item.product.name}</p>
+                            <p className="text-sm text-neutral-500">Qty: {item.quantity} × Rp {Number(item.price).toLocaleString('id-ID')}</p>
                           </div>
                         </div>
-                        <p className="font-medium">
+                        <p className="font-semibold text-neutral-800">
                           Rp {(Number(item.price) * item.quantity).toLocaleString('id-ID')}
                         </p>
                       </div>
@@ -253,9 +258,8 @@ export default function AdminOrderDetailPage() {
                   </div>
                 </div>
 
-                {/* Totals */}
-                <div className="border-t mt-4 pt-4">
-                  <div className="space-y-2">
+                <div className="border-t border-neutral-200 mt-6 pt-6">
+                  <div className="space-y-3">
                     <div className="flex justify-between text-neutral-600">
                       <span>Subtotal</span>
                       <span>Rp {Number(order.total_amount + order.discount_amount).toLocaleString('id-ID')}</span>
@@ -266,7 +270,7 @@ export default function AdminOrderDetailPage() {
                         <span>- Rp {Number(order.discount_amount).toLocaleString('id-ID')}</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                    <div className="flex justify-between text-xl font-bold pt-3 border-t border-neutral-200">
                       <span>Total</span>
                       <span className="text-lime-600">
                         Rp {Number(order.total_amount).toLocaleString('id-ID')}
@@ -275,95 +279,101 @@ export default function AdminOrderDetailPage() {
                   </div>
                 </div>
 
-                {/* Notes */}
                 {order.notes && (
-                  <div className="border-t mt-4 pt-4">
-                    <h3 className="font-semibold mb-2">Notes</h3>
-                    <p className="text-neutral-600">{order.notes}</p>
+                  <div className="border-t border-neutral-200 mt-6 pt-6">
+                    <h3 className="font-semibold text-neutral-800 mb-2">Notes</h3>
+                    <p className="text-neutral-600 bg-neutral-50 p-4 rounded-xl">{order.notes}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Sidebar */}
             <div className="space-y-6">
-              {/* Customer Info */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="font-semibold mb-3">Customer</h2>
-                <div className="space-y-2">
-                  <p className="font-medium">{order.user.name}</p>
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-lime-100 rounded-xl flex items-center justify-center">
+                    <FiUser className="text-lime-600" />
+                  </div>
+                  <h3 className="font-semibold text-neutral-800">Customer</h3>
+                </div>
+                <div className="space-y-3">
+                  <p className="font-medium text-neutral-800">{order.user.name}</p>
                   <p className="text-sm text-neutral-600">{order.user.email}</p>
                   {order.user.phone && (
                     <p className="text-sm text-neutral-600">{order.user.phone}</p>
                   )}
                 </div>
               </div>
-
-              {/* Shipping Address */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="font-semibold mb-3">Shipping Address</h2>
+ 
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <FiMapPin className="text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-neutral-800">Shipping Address</h3>
+                </div>
                 <div className="space-y-2">
-                  <p className="font-medium">{order.address.recipient_name}</p>
+                  <p className="font-medium text-neutral-800">{order.address.recipient_name}</p>
                   <p className="text-sm text-neutral-600">{order.address.phone}</p>
                   <p className="text-sm text-neutral-600">
-                    {order.address.address}, {order.address.city}
+                    {order.address.address}
                   </p>
                   <p className="text-sm text-neutral-600">
-                    {order.address.province} {order.address.postal_code}
+                    {order.address.city}, {order.address.province} {order.address.postal_code}
                   </p>
                 </div>
               </div>
 
-              {/* Payment / Invoice */}
-              <div className="bg-white p-6 rounded-lg shadow">
-                <div className="flex items-center gap-2 mb-3">
-                  <FiCreditCard className="text-neutral-600" />
-                  <h2 className="font-semibold">Payment & Invoice</h2>
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <FiCreditCard className="text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-neutral-800">Payment</h3>
                 </div>
                 
                 {order.payment ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-neutral-600">Status</span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getPaymentStatusColor(order.payment.status)}`}>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-neutral-500">Status</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getPaymentStatusColor(order.payment.status)}`}>
                         {order.payment.status}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-neutral-600">Amount</span>
-                      <span className="font-medium text-lime-600">
+                      <span className="text-sm text-neutral-500">Amount</span>
+                      <span className="font-semibold text-lime-600">
                         Rp {Number(order.payment.amount).toLocaleString('id-ID')}
                       </span>
                     </div>
                     {order.payment.payment_method && (
                       <div className="flex justify-between">
-                        <span className="text-neutral-600">Method</span>
-                        <span className="font-medium">{order.payment.payment_method}</span>
+                        <span className="text-sm text-neutral-500">Method</span>
+                        <span className="text-neutral-700">{order.payment.payment_method}</span>
                       </div>
                     )}
                     {order.payment.paid_at && (
                       <div className="flex justify-between">
-                        <span className="text-neutral-600">Paid at</span>
-                        <span className="text-sm">
+                        <span className="text-sm text-neutral-500">Paid at</span>
+                        <span className="text-neutral-700 text-sm">
                           {new Date(order.payment.paid_at).toLocaleString('id-ID')}
                         </span>
                       </div>
                     )}
                     
-                    {/* Invoice Details */}
-                    <div className="border-t pt-3 mt-3">
-                      <h3 className="text-sm font-semibold mb-2">Invoice Details</h3>
-                      <div className="space-y-1 text-sm">
+                    <div className="border-t border-neutral-200 pt-4 mt-4">
+                      <p className="text-xs font-semibold text-neutral-500 mb-2">Invoice Details</p>
+                      <div className="space-y-1 text-xs">
                         {order.payment.xendit_invoice_id && (
                           <p className="text-neutral-600">
                             <span className="font-medium">Invoice ID:</span>{' '}
-                            <span className="font-mono text-xs">{order.payment.xendit_invoice_id}</span>
+                            <span className="font-mono">{order.payment.xendit_invoice_id}</span>
                           </p>
                         )}
                         {order.payment.xendit_external_id && (
                           <p className="text-neutral-600">
                             <span className="font-medium">External ID:</span>{' '}
-                            <span className="font-mono text-xs">{order.payment.xendit_external_id}</span>
+                            <span className="font-mono">{order.payment.xendit_external_id}</span>
                           </p>
                         )}
                       </div>
@@ -371,7 +381,7 @@ export default function AdminOrderDetailPage() {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-neutral-500">No payment information</p>
+                    <p className="text-neutral-400">No payment information</p>
                   </div>
                 )}
               </div>

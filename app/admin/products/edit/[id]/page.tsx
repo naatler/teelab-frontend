@@ -7,6 +7,7 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
+import { FiUpload, FiX, FiBox, FiType, FiImage, FiLayers } from 'react-icons/fi';
 
 interface Category {
   id: string;
@@ -21,6 +22,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [form, setForm] = useState({
     name: '',
@@ -89,6 +91,17 @@ export default function EditProductPage() {
     }
   };
 
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setForm({ ...form, image_url: "" });
+    }
+  };
+
   const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, image_url: e.target.value });
     setImageFile(null);
@@ -134,7 +147,7 @@ export default function EditProductPage() {
         is_active: form.is_active,
       });
 
-      toast.success('Product updated!');
+      toast.success('Product updated successfully!');
       router.push('/admin/products');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update product');
@@ -148,7 +161,13 @@ export default function EditProductPage() {
       <>
         <Navbar />
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-          <div className="text-xl">Loading...</div>
+          <div className="flex items-center gap-3">
+            <svg className="animate-spin h-6 w-6 text-lime-600" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            <span className="text-neutral-600">Loading...</span>
+          </div>
         </div>
       </>
     );
@@ -159,153 +178,252 @@ export default function EditProductPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-neutral-50 flex justify-center items-center py-8">
-        <div className="bg-white p-8 rounded-lg shadow w-full max-w-lg">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-neutral-700">Edit Product</h1>
-            <Link href="/admin/products" className="text-lime-600 hover:underline">
-              Back
-            </Link>
+      <div className="min-h-screen bg-neutral-50 py-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <Link 
+                href="/admin/products" 
+                className="text-neutral-500 hover:text-lime-600 text-sm mb-2 inline-flex items-center gap-1"
+              >
+                ← Back to products
+              </Link>
+              <h1 className="text-3xl font-bold text-neutral-800">Edit Product</h1>
+              <p className="text-neutral-500 mt-1">Update product details below</p>
+            </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Name</label>
-              <input
-                type="text"
-                required
-                className="w-full border p-2 rounded text-neutral-700"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Price</label>
-                <input
-                  type="number"
-                  required
-                  className="w-full border p-2 rounded text-neutral-700"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">Stock</label>
-                <input
-                  type="number"
-                  required
-                  className="w-full border p-2 rounded text-neutral-700"
-                  value={form.stock}
-                  onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">Image</label>
-              
-              <div className="border-2 border-dashed border-neutral-300 rounded-lg p-4">
-                {imagePreview ? (
-                  <div className="relative">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-48 object-contain rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview("");
-                        setForm({ ...form, image_url: "" });
-                      }}
-                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className="cursor-pointer text-neutral-500 hover:text-neutral-700"
-                    >
-                      <div className="py-4">
-                        <p className="text-sm">Click to upload new image</p>
-                        <p className="text-xs text-neutral-400">PNG, JPG, GIF (max 5MB)</p>
-                      </div>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Form */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Basic Info Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <h2 className="text-lg font-semibold text-neutral-800 mb-5 flex items-center gap-2">
+                  <FiType className="text-lime-600" /> Basic Information
+                </h2>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Product Name <span className="text-red-500">*</span>
                     </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter product name"
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    />
                   </div>
-                )}
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Price <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400">Rp</span>
+                        <input
+                          type="number"
+                          required
+                          placeholder="0"
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition"
+                          value={form.price}
+                          onChange={(e) => setForm({ ...form, price: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Stock <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        placeholder="0"
+                        className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition"
+                        value={form.stock}
+                        onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      required
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition bg-white"
+                      value={form.category_id}
+                      onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                    >
+                      <option value="">Select a category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Description
+                    </label>
+                    <textarea
+                      placeholder="Enter product description..."
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition resize-none"
+                      rows={4}
+                      value={form.description}
+                      onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="mt-2 text-center text-sm text-neutral-500">or</div>
+              {/* Image Upload Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <h2 className="text-lg font-semibold text-neutral-800 mb-5 flex items-center gap-2">
+                  <FiImage className="text-lime-600" /> Product Image
+                </h2>
+                
+                <div 
+                  className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                    isDragging 
+                      ? "border-lime-500 bg-lime-50" 
+                      : "border-neutral-300 hover:border-neutral-400"
+                  }`}
+                  onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                  onDragLeave={() => setIsDragging(false)}
+                  onDrop={handleDrop}
+                >
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-h-64 mx-auto rounded-lg object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreview("");
+                          setForm({ ...form, image_url: "" });
+                        }}
+                        className="absolute top-2 right-2 bg-neutral-800 text-white rounded-full p-2 hover:bg-neutral-700 transition"
+                      >
+                        <FiX size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="py-6">
+                      <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FiUpload className="text-lime-600 text-2xl" />
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label
+                        htmlFor="image-upload"
+                        className="cursor-pointer"
+                      >
+                        <p className="text-neutral-700 font-medium">Click to upload new image</p>
+                        <p className="text-neutral-400 text-sm mt-1">or drag and drop</p>
+                      </label>
+                      <p className="text-neutral-400 text-xs mt-3">PNG, JPG, GIF up to 5MB</p>
+                    </div>
+                  )}
+                </div>
 
-              <input
-                type="text"
-                placeholder="Image URL"
-                className="w-full border p-2 rounded text-neutral-700 mt-2"
-                value={form.image_url}
-                onChange={handleImageUrlChange}
-              />
+                <div className="mt-4">
+                  <p className="text-sm text-neutral-500 text-center mb-2">— or —</p>
+                  <input
+                    type="text"
+                    placeholder="Paste image URL here..."
+                    className="w-full px-4 py-3 rounded-xl border border-neutral-200 text-neutral-700 focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition"
+                    value={form.image_url}
+                    onChange={handleImageUrlChange}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Category</label>
-              <select
-                required
-                className="w-full border p-2 rounded text-neutral-700"
-                value={form.category_id}
-                onChange={(e) => setForm({ ...form, category_id: e.target.value })}
-              >
-                <option value="">Select Category</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Status Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                <h3 className="font-semibold text-neutral-800 mb-4">Product Status</h3>
+                
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={form.is_active}
+                      onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-lime-500' : 'bg-neutral-300'}`}>
+                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${form.is_active ? 'translate-x-7' : 'translate-x-1'}`} />
+                    </div>
+                  </div>
+                  <span className="text-neutral-700 font-medium">
+                    {form.is_active ? 'Active - Show on website' : 'Inactive - Hide from website'}
+                  </span>
+                </label>
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Description</label>
-              <textarea
-                className="w-full border p-2 rounded text-neutral-700"
-                rows={3}
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
-            </div>
+              {/* Submit Card */}
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sticky top-8">
+                <h3 className="font-semibold text-neutral-800 mb-4">Save Changes</h3>
+                <p className="text-neutral-500 text-sm mb-6">
+                  Make sure all information is correct before saving.
+                </p>
+                
+                <button
+                  type="submit"
+                  disabled={saving || uploading}
+                  className="w-full bg-lime-600 text-white py-4 rounded-xl font-semibold hover:bg-lime-700 disabled:bg-neutral-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                  {uploading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Uploading...
+                    </>
+                  ) : saving ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FiBox />
+                      Save Changes
+                    </>
+                  )}
+                </button>
 
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="is_active"
-                checked={form.is_active}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <label htmlFor="is_active" className="text-sm text-neutral-700">
-                Active (show on website)
-              </label>
+                <Link
+                  href="/admin/products"
+                  className="block text-center text-neutral-500 hover:text-neutral-700 text-sm mt-4"
+                >
+                  Cancel
+                </Link>
+              </div>
             </div>
-
-            <button
-              type="submit"
-              disabled={saving || uploading}
-              className="w-full bg-lime-600 text-white py-2 rounded hover:bg-lime-700 disabled:bg-neutral-400 transition"
-            >
-              {uploading ? 'Uploading...' : saving ? 'Saving...' : 'Save Changes'}
-            </button>
           </form>
         </div>
       </div>

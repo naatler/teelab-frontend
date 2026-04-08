@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
 import { ShoppingBag } from "lucide-react";
-import axios from '@/app/lib/axios';
+import axios from "@/app/lib/axios";
 
 interface Category {
   id: string;
@@ -24,6 +24,10 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribeMessage, setSubscribeMessage] = useState("");
+  const [subscribeSuccess, setSubscribeSuccess] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -32,15 +36,36 @@ export default function Home() {
   const fetchData = async () => {
     try {
       const [categoriesRes, productsRes] = await Promise.all([
-        axios.get('/categories'),
-        axios.get('/products'),
+        axios.get("/categories"),
+        axios.get("/products"),
       ]);
       setCategories(categoriesRes.data);
-      setProducts(productsRes.data.slice(0, 8));  
+      setProducts(productsRes.data.slice(0, 8));
     } catch (error) {
-      console.error('Failed to fetch data:', error);
+      console.error("Failed to fetch data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubscribing(true);
+    setSubscribeMessage("");
+    
+    try {
+      // Here you can integrate with your newsletter API
+      // For now, just simulate a successful subscription
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setSubscribeSuccess(true);
+      setSubscribeMessage("Thank you for subscribing!");
+      setEmail("");
+    } catch (error) {
+      setSubscribeSuccess(false);
+      setSubscribeMessage("Something went wrong. Please try again.");
+    } finally {
+      setSubscribing(false);
     }
   };
 
@@ -97,7 +122,8 @@ export default function Home() {
                 className="inline-block ml-4 w-[90px] sm:w-[110px] md:w-[130px] object-contain align-middle"
               />{" "}
               <span className="text-neutral-400 px-2">
-                who see the game as more than just a sport it's a lifestyle !.{" "}
+                who see the game as more than just a sport it's a lifestyle
+                !.{" "}
               </span>
             </h2>
           </div>
@@ -135,28 +161,32 @@ export default function Home() {
           <h2 className="text-5xl font-medium text-neutral-700 mb-2">
             Top-Quality Golf Equipment for
           </h2>
-          <h3 className="text-5xl font-medium text-neutral-400 mb-12">
+          <h3 className="text-5xl font-medium text-neutral-400 mb-8">
             Every Game!
           </h3>
 
           {!loading && categories.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
               {categories.map((category) => (
                 <Link
                   key={category.id}
                   href={`/products?category=${category.id}`}
-                  className="bg-neutral-100 hover:bg-neutral-200 p-6 rounded-xl text-center transition"
+                  className="bg-white hover:bg-neutral-100 p-1 rounded-full text-center transition border-2 border-neutral-300"
                 >
-                  <h4 className="text-lg font-semibold text-neutral-700">{category.name}</h4>
+                  <h4 className="text-lg text-neutral-500">{category.name}</h4>
                 </Link>
               ))}
             </div>
           )}
 
           <div className="mb-8">
-            <h3 className="text-2xl font-bold text-neutral-700 mb-6">Featured Products</h3>
+            <h3 className="text-2xl font-medium text-neutral-700 mb-6">
+              Featured Products
+            </h3>
             {loading ? (
-              <div className="text-center py-12 text-neutral-500">Loading products...</div>
+              <div className="text-center py-12 text-neutral-500">
+                Loading products...
+              </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 {products.map((product) => (
@@ -165,7 +195,7 @@ export default function Home() {
                     href={`/products/${product.id}`}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group"
                   >
-                    <div className="relative h-48 bg-neutral-200 overflow-hidden">
+                    <div className="relative h-70 bg-neutral-200 overflow-hidden">
                       {product.image_url ? (
                         <img
                           src={product.image_url}
@@ -182,33 +212,68 @@ export default function Home() {
                       <p className="text-xs text-neutral-500 mb-1">
                         {product.category?.name}
                       </p>
-                      <h4 className="font-semibold text-neutral-700 mb-2 truncate">
+                      <h4 className="font-semibold text-neutral-800 mb-2 truncate">
                         {product.name}
                       </h4>
                       <p className="text-lime-600 font-bold">
-                        Rp {Number(product.price).toLocaleString('id-ID')}
+                        Rp {Number(product.price).toLocaleString("id-ID")}
                       </p>
                     </div>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-neutral-500">No products available</div>
+              <div className="text-center py-12 text-neutral-500">
+                No products available
+              </div>
             )}
-          </div>
-
-          <div className="text-center">
-            <Link
-              href="/products"
-              className="inline-block bg-lime-600 text-white px-8 py-3 rounded-full hover:bg-lime-700 transition"
-            >
-              Browse All Products
-            </Link>
           </div>
         </div>
       </section>
+      <section id="course" className="bg-white min-h-[600px]">
+        <div className="container mx-auto px-4">
+          <div className="bg-neutral-800 min-h-[400px] rounded-2xl p-6">
+            <div className="flex items-start gap-8">
+              <img
+                src="/images/course.png"
+                alt=""
+                className="h-80 object-contain"
+              />
+              <div className="flex flex-col gap-4 ">
+                <p className="text-neutral-100 border border-neutral-600 rounded-full px-4 py-2 w-fit">
+                  Course
+                </p>
 
-
+                <h1 className="text-5xl font-medium text-neutral-100 max-w-3xl mt-20">
+               Get Golf Tips & Exclusive Deals - Join Course Now!
+                </h1>
+                 <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 mt-4">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  className="flex-1 px-4 py-3 rounded-full bg-neutral-800 border-2 border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-lime-500 transition"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <button
+                  type="submit"
+                  disabled={subscribing}
+                  className="px-8 py-3 bg-lime-600 text-white font-semibold rounded-full hover:bg-lime-700 disabled:opacity-50 transition"
+                >
+                  {subscribing ? 'Subscribing...' : 'Subscribe'}
+                </button>
+              </form>
+              {subscribeMessage && (
+                <p className={`mt-4 text-sm ${subscribeSuccess ? 'text-lime-400' : 'text-red-400'}`}>
+                  {subscribeMessage}
+                </p>
+              )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

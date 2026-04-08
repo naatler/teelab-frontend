@@ -170,7 +170,7 @@ export default function ProductsPage() {
                 className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group"
               >
                 <Link href={`/products/${product.id}`}>
-                  <div className="relative h-64 bg-neutral-200 overflow-hidden">
+                  <div className="relative h-70 bg-neutral-100 overflow-hidden">
                     {product.image_url ? (
                       <img
                         src={product.image_url}
