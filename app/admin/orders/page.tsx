@@ -102,7 +102,6 @@ export default function AdminOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'processing': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'delivered': return 'bg-lime-100 text-lime-800 border-lime-200';
@@ -114,7 +113,6 @@ export default function AdminOrdersPage() {
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'paid': return 'text-lime-600';
-      case 'pending': return 'text-yellow-600';
       case 'expired': return 'text-red-600';
       default: return 'text-neutral-500';
     }
@@ -122,7 +120,6 @@ export default function AdminOrdersPage() {
 
   const statusOptions = [
     { value: '', label: 'All Orders', icon: FiShoppingBag },
-    { value: 'pending', label: 'Pending', icon: FiClock },
     { value: 'processing', label: 'Processing', icon: FiPackage },
     { value: 'shipped', label: 'Shipped', icon: FiTruck },
     { value: 'delivered', label: 'Delivered', icon: FiCheck },
@@ -143,10 +140,8 @@ export default function AdminOrdersPage() {
           </div>
           </FadeIn>
 
-          {/* Filters Bar */}
           <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4 mb-6">
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-              {/* Status Filter Pills */}
               <div className="flex flex-wrap gap-2">
                 {statusOptions.map((option) => {
                   const Icon = option.icon;
@@ -168,7 +163,6 @@ export default function AdminOrdersPage() {
                 })}
               </div>
 
-              {/* Search */}
               <form onSubmit={handleSearch} className="flex gap-2 w-full lg:w-auto">
                 <div className="relative flex-1 lg:w-64">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
@@ -190,21 +184,7 @@ export default function AdminOrdersPage() {
             </div>
           </div>
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
-                  <FiClock className="text-yellow-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-neutral-500">Pending</p>
-                  <p className="text-xl font-bold text-neutral-800">
-                    {orders.filter(o => o.status === 'pending').length}
-                  </p>
-                </div>
-              </div>
-            </div>
             <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -220,13 +200,26 @@ export default function AdminOrdersPage() {
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-lime-100 rounded-xl flex items-center justify-center">
-                  <FiCheck className="text-lime-600" />
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <FiCheck className="text-green-600" />
                 </div>
                 <div>
                   <p className="text-sm text-neutral-500">Delivered</p>
                   <p className="text-xl font-bold text-neutral-800">
                     {orders.filter(o => o.status === 'delivered').length}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
+                  <FiX className="text-red-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-neutral-500">Cancelled</p>
+                  <p className="text-xl font-bold text-neutral-800">
+                    {orders.filter(o => o.status === 'cancelled').length}
                   </p>
                 </div>
               </div>

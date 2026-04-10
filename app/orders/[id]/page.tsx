@@ -6,6 +6,7 @@ import axios from "@/app/lib/axios";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import Link from "next/link";
 import {
   FiArrowLeft,
@@ -180,12 +181,33 @@ export default function OrderDetailPage() {
   };
 
   const handleCancelOrder = async () => {
-    if (!confirm("Are you sure you want to cancel this order?")) return;
+    const result = await Swal.fire({
+      title: "Cancel Order?",
+      html: "Are you sure you want to cancel this order? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, cancel it",
+      cancelButtonText: "Keep Order",
+      width: "400px",
+    });
+
+    if (!result.isConfirmed) return;
 
     setCancelling(true);
     try {
       await axios.post(`/orders/${id}/cancel`);
-      toast.success("Order cancelled successfully!");
+      
+      await Swal.fire({
+        title: "Cancelled!",
+        text: "Your order has been cancelled.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        width: "350px",
+      });
+      
       setOrder((prev) => (prev ? { ...prev, status: "cancelled" } : null));
       setTimeout(() => {
         router.push("/orders");

@@ -7,6 +7,7 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { FiPlus, FiEdit, FiTrash2, FiShoppingBag } from 'react-icons/fi';
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from '@/app/components/PageTransition';
 
@@ -119,11 +120,32 @@ export default function AdminCategoriesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
+    const result = await Swal.fire({
+      title: 'Delete Category?',
+      html: 'Are you sure you want to delete this category? This may affect products in this category.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      width: '400px',
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await axios.delete(`/admin/categories/${id}`);
-      toast.success('Category deleted successfully');
+      
+      await Swal.fire({
+        title: 'Deleted!',
+        text: 'Category has been deleted.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        width: '350px',
+      });
+      
       fetchCategories();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to delete category');

@@ -63,7 +63,7 @@ interface Order {
   } | null;
 }
 
-const statusOptions = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+const statusOptions = [ 'processing', 'shipped', 'delivered', 'cancelled'];
 
 export default function AdminOrderDetailPage() {
   const { id } = useParams();
@@ -113,7 +113,6 @@ export default function AdminOrderDetailPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <FiClock className="text-yellow-600" />;
       case 'processing': return <FiPackage className="text-blue-600" />;
       case 'shipped': return <FiTruck className="text-purple-600" />;
       case 'delivered': return <FiCheck className="text-lime-600" />;
@@ -124,7 +123,6 @@ export default function AdminOrderDetailPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'processing': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'shipped': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'delivered': return 'bg-lime-100 text-lime-800 border-lime-200';
@@ -136,7 +134,6 @@ export default function AdminOrderDetailPage() {
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'paid': return 'bg-lime-100 text-lime-800 border-lime-200';
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'expired': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-neutral-100 text-neutral-800 border-neutral-200';
     }

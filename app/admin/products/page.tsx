@@ -7,6 +7,7 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { FiEdit, FiTrash2, FiPlus, FiSearch, FiPackage, FiFilter } from 'react-icons/fi';
 import PageTransition, { FadeIn } from '@/app/components/PageTransition';
 
@@ -62,13 +63,34 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    const result = await Swal.fire({
+      title: 'Delete Product?',
+      html: `Are you sure you want to delete <strong>${name}</strong>?<br><br>This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+      width: '400px',
+    });
+
+    if (!result.isConfirmed) return;
     
     setDeleteId(id);
     try {
       await axios.delete(`/admin/products/${id}`);
-      toast.success('Product deleted!');
+      
+      await Swal.fire({
+        title: 'Deleted!',
+        text: 'Product has been deleted.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        width: '350px',
+      });
+      
       fetchProducts();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to delete product');
@@ -205,7 +227,7 @@ export default function AdminProductsPage() {
                               <FiEdit className="w-4 h-4" />
                             </Link>
                             <button
-                              onClick={() => handleDelete(product.id)}
+                              onClick={() => handleDelete(product.id, product.name)}
                               disabled={deleteId === product.id}
                               className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
                               title="Delete"

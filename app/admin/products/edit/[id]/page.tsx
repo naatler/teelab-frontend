@@ -7,6 +7,7 @@ import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import { FiUpload, FiX, FiBox, FiType, FiImage, FiLayers } from 'react-icons/fi';
 
 interface Category {
@@ -147,7 +148,15 @@ export default function EditProductPage() {
         is_active: form.is_active,
       });
 
-      toast.success('Product updated successfully!');
+      await Swal.fire({
+        title: 'Updated!',
+        text: 'Product has been updated successfully.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        width: '350px',
+      });
+      
       router.push('/admin/products');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update product');

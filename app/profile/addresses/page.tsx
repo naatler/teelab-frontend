@@ -7,6 +7,7 @@ import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 import { FiMapPin, FiEdit, FiTrash2, FiStar, FiPlus } from "react-icons/fi";
 import PageTransition, {
   StaggerContainer,
@@ -146,11 +147,32 @@ export default function AddressesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this address?")) return;
+    const result = await Swal.fire({
+      title: "Delete Address?",
+      html: "Are you sure you want to delete this address?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      width: "400px",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await axios.delete(`/addresses/${id}`);
-      toast.success("Address deleted");
+      
+      await Swal.fire({
+        title: "Deleted!",
+        text: "Address has been deleted.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+        width: "350px",
+      });
+      
       fetchAddresses();
     } catch (error) {
       toast.error("Failed to delete address");

@@ -8,6 +8,7 @@ import Footer from '@/app/components/Footer';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2';
 import Link from 'next/link';
 import { ShoppingBag, Package, Trash2, Minus, Plus, ArrowRight, ShieldCheck } from 'lucide-react';
 import PageTransition, { FadeIn, ScaleIn } from '@/app/components/PageTransition';
@@ -98,10 +99,32 @@ export default function CartPage() {
   };
 
   const clearCart = async () => {
+    const result = await Swal.fire({
+      title: 'Clear Cart?',
+      html: 'Are you sure you want to remove all items from your cart?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, clear it',
+      cancelButtonText: 'Cancel',
+      width: '400px',
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       await axios.delete('/cart');
       fetchCart();
-      toast.success('Cart cleared');
+      
+      await Swal.fire({
+        title: 'Cleared!',
+        text: 'Your cart has been cleared.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        width: '350px',
+      });
     } catch {
       toast.error('Failed to clear cart');
     }
