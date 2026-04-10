@@ -4,12 +4,18 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
+<<<<<<< HEAD
 import Footer from '@/app/components/Footer';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import Link from 'next/link';
 import PageTransition, { FadeIn, ScaleIn, HoverCard } from '@/app/components/PageTransition';
 import { Star } from 'lucide-react';
+=======
+import toast from 'react-hot-toast';
+import { useAuthStore } from '@/app/store/useAuthStore';
+import Link from 'next/link';
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
 
 interface Product {
   id: string;
@@ -24,6 +30,7 @@ interface Product {
   };
 }
 
+<<<<<<< HEAD
 interface Review {
   id: string;
   rating: number;
@@ -34,6 +41,8 @@ interface Review {
   };
 }
 
+=======
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -41,6 +50,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+<<<<<<< HEAD
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -51,6 +61,11 @@ export default function ProductDetailPage() {
   useEffect(() => {
     fetchProduct();
     fetchReviews();
+=======
+
+  useEffect(() => {
+    fetchProduct();
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
   }, [params.id]);
 
   const fetchProduct = async () => {
@@ -65,6 +80,7 @@ export default function ProductDetailPage() {
     }
   };
 
+<<<<<<< HEAD
   const fetchReviews = async () => {
     try {
       const { data } = await axios.get(`/products/${params.id}/reviews`);
@@ -104,6 +120,8 @@ export default function ProductDetailPage() {
     }
   };
 
+=======
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
   const addToCart = async () => {
     if (!user) {
       toast.error('Please login first');
@@ -119,6 +137,7 @@ export default function ProductDetailPage() {
       toast.success('Added to cart!');
       router.push('/cart');
     } catch (error: any) {
+<<<<<<< HEAD
       const status = error.response?.status;
       if (status === 401 || status === 403) {
         toast.error("Session expired. Please login again");
@@ -126,6 +145,9 @@ export default function ProductDetailPage() {
       } else {
         toast.error(error.response?.data?.message || 'Failed to add to cart');
       }
+=======
+      toast.error(error.response?.data?.message || 'Failed to add to cart');
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
     }
   };
 
@@ -133,7 +155,11 @@ export default function ProductDetailPage() {
     return (
       <>
         <Navbar />
+<<<<<<< HEAD
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+=======
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
           <div className="text-xl">Loading...</div>
         </div>
       </>
@@ -145,6 +171,7 @@ export default function ProductDetailPage() {
   return (
     <>
       <Navbar />
+<<<<<<< HEAD
       <PageTransition>
       <div className="min-h-screen bg-neutral-50">
         <div className="container mx-auto px-4 py-8">
@@ -164,10 +191,26 @@ export default function ProductDetailPage() {
             <div className="grid lg:grid-cols-2 gap-0">
               <ScaleIn delay={0.1}>
               <div className="relative aspect-square lg:aspect-auto lg:min-h-[500px] bg-neutral-100">
+=======
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <button
+            onClick={() => router.back()}
+            className="mb-6 text-green-600 hover:underline flex items-center gap-2"
+          >
+            ← Back to Products
+          </button>
+
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-8 p-8">
+              {/* Product Image */}
+              <div className="bg-gray-200 rounded-lg h-96 flex items-center justify-center overflow-hidden">
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
                 {product.image_url ? (
                   <img
                     src={product.image_url}
                     alt={product.name}
+<<<<<<< HEAD
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -257,6 +300,75 @@ export default function ProductDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.5.363 1.77l9.597 9.597c.34.34.9.36 1.307.09L17 14" />
                   </svg>
                   {product.stock === 0 ? 'Sold Out' : 'Add to Cart'}
+=======
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                ) : (
+                  <span className="text-gray-400 text-9xl">📦</span>
+                )}
+              </div>
+
+              {/* Product Info */}
+              <div>
+                <p className="text-sm text-gray-500 mb-2">
+                  {product.category.name}
+                </p>
+                <h1 className="text-4xl font-bold mb-4 text-neutral-700">
+                  {product.name}
+                </h1>
+                <p className="text-5xl font-bold text-green-600 mb-6">
+                  Rp {Number(product.price).toLocaleString('id-ID')}
+                </p>
+
+                <div className="mb-6">
+                  <p className="text-gray-700 mb-2">
+                    <span className="font-semibold">Stock:</span> {product.stock}{' '}
+                    units
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {product.description || 'No description available'}
+                  </p>
+                </div>
+
+                {/* Quantity Selector */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Quantity
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      max={product.stock}
+                      value={quantity}
+                      onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                      className="w-20 px-4 py-2 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    />
+                    <button
+                      onClick={() =>
+                        setQuantity(Math.min(product.stock, quantity + 1))
+                      }
+                      className="w-10 h-10 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                {/* Add to Cart Button */}
+                <button
+                  onClick={addToCart}
+                  disabled={product.stock === 0}
+                  className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition text-lg"
+                >
+                  {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
                 </button>
 
                 {/* Admin Actions */}
@@ -264,12 +376,17 @@ export default function ProductDetailPage() {
                   <div className="mt-4">
                     <Link
                       href={`/admin/products/${product.id}/edit`}
+<<<<<<< HEAD
                       className="block w-full bg-yellow-500 text-white py-3 rounded-xl text-center font-medium hover:bg-yellow-600 transition"
+=======
+                      className="block w-full bg-yellow-500 text-white py-3 rounded-lg text-center hover:bg-yellow-600 transition"
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
                     >
                       Edit Product
                     </Link>
                   </div>
                 )}
+<<<<<<< HEAD
                 </div>
               </FadeIn>
             </div>
@@ -381,6 +498,13 @@ export default function ProductDetailPage() {
       </div>
       </PageTransition>
       <Footer />
+=======
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
     </>
   );
 }

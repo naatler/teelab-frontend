@@ -2,6 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const axiosInstance = axios.create({
+<<<<<<< HEAD
   baseURL: process.env.NEXT_PUBLIC_API_URL || '',
   headers: {
     'Content-Type': 'application/json',
@@ -53,8 +54,37 @@ axiosInstance.interceptors.response.use(
       }
     }
 
+=======
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add token to every request
+axiosInstance.interceptors.request.use((config) => {
+  const token = Cookies.get('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Handle response errors
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      Cookies.remove('token');
+      window.location.href = '/login';
+    }
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
     return Promise.reject(error);
   }
 );
 
+<<<<<<< HEAD
 export default axiosInstance; 
+=======
+export default axiosInstance;
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8

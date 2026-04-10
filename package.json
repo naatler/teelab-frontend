@@ -11,7 +11,10 @@
   "dependencies": {
     "@tanstack/react-query": "^5.96.2",
     "axios": "^1.14.0",
+<<<<<<< HEAD
     "framer-motion": "^12.38.0",
+=======
+>>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
     "js-cookie": "^3.0.5",
     "lucide-react": "^1.7.0",
     "next": "16.2.2",
