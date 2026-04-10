@@ -4,19 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
-<<<<<<< HEAD
 import Footer from '@/app/components/Footer';
-=======
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
 import { useAuthStore } from '@/app/store/useAuthStore';
 import { useCartStore } from '@/app/store/useCartStore';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-<<<<<<< HEAD
-import { ShoppingCart, Package, Trash2 } from 'lucide-react';
-import PageTransition, { StaggerContainer, StaggerItem, HoverCard } from '@/app/components/PageTransition';
-=======
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
+import { ShoppingBag, Package, Trash2, Minus, Plus, ArrowRight, ShieldCheck } from 'lucide-react';
+import PageTransition, { FadeIn, ScaleIn } from '@/app/components/PageTransition';
 
 interface CartItem {
   id: string;
@@ -38,11 +32,11 @@ interface Cart {
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-<<<<<<< HEAD
-  const { setItems, items } = useCartStore();
+  const { setItems } = useCartStore();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setMounted(true);
@@ -50,61 +44,22 @@ export default function CartPage() {
 
   useEffect(() => {
     if (!mounted) return;
-    
-    // Debug: log user state
-    console.log('Cart page - user:', user);
-    
-    // Check if user exists in zustand store
-    const checkAuth = () => {
-      const authStorage = localStorage.getItem('auth-storage');
-      console.log('Cart page - auth storage:', authStorage);
-      
-      if (!authStorage) {
-        router.push('/login');
-        return;
-      }
-      fetchCart();
-    };
-    
-    // If user state is set, fetch cart
-    if (user) {
-      fetchCart();
-    } else {
-      // Check localStorage directly for persisted state
-      setTimeout(checkAuth, 50);
-    }
-  }, [user, mounted]);
 
-  const fetchCart = async () => {
-    if (!mounted) return;
-    
-    try {
-      const response = await axios.get('/cart');
-      console.log('Cart response:', response.data);
-      setCart(response.data);
-      setItems(response.data.items || []);
-    } catch (error: any) {
-      console.error('Failed to fetch cart:', error);
-=======
-  const { setItems } = useCartStore();
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
     if (!user) {
       router.push('/login');
       return;
     }
+
     fetchCart();
-  }, [user]);
+  }, [user, mounted]);
 
   const fetchCart = async () => {
     try {
       const { data } = await axios.get('/cart');
       setCart(data);
       setItems(data.items || []);
-    } catch (error) {
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
+    } catch (error: any) {
+      console.error(error);
       toast.error('Failed to fetch cart');
     } finally {
       setLoading(false);
@@ -113,36 +68,41 @@ export default function CartPage() {
 
   const updateQuantity = async (itemId: string, quantity: number) => {
     if (quantity < 1) return;
+    if (updatingIds.has(itemId)) return;
 
+    setUpdatingIds(prev => new Set(prev).add(itemId));
+    
     try {
       await axios.patch(`/cart/items/${itemId}`, { quantity });
       fetchCart();
       toast.success('Cart updated');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update cart');
+    } finally {
+      setUpdatingIds(prev => {
+        const next = new Set(prev);
+        next.delete(itemId);
+        return next;
+      });
     }
   };
 
   const removeItem = async (itemId: string) => {
-    if (!confirm('Remove this item from cart?')) return;
-
     try {
       await axios.delete(`/cart/items/${itemId}`);
       fetchCart();
       toast.success('Item removed');
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove item');
     }
   };
 
   const clearCart = async () => {
-    if (!confirm('Clear all items from cart?')) return;
-
     try {
       await axios.delete('/cart');
       fetchCart();
       toast.success('Cart cleared');
-    } catch (error) {
+    } catch {
       toast.error('Failed to clear cart');
     }
   };
@@ -167,12 +127,11 @@ export default function CartPage() {
     return (
       <>
         <Navbar />
-<<<<<<< HEAD
         <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-=======
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
-          <div className="text-xl">Loading cart...</div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-3 border-lime-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-neutral-500">Loading cart...</p>
+          </div>
         </div>
       </>
     );
@@ -181,315 +140,166 @@ export default function CartPage() {
   return (
     <>
       <Navbar />
-<<<<<<< HEAD
       <PageTransition>
         <div className="min-h-screen bg-neutral-50">
-          <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-neutral-800">Shopping Cart</h1>
-            {cart && cart.items.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-red-500 hover:text-red-600 text-sm font-medium transition"
-=======
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-neutral-700">Shopping Cart</h1>
-            {cart && cart.items.length > 0 && (
-              <button
-                onClick={clearCart}
-                className="text-red-600 hover:underline"
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
-              >
-                Clear Cart
-              </button>
-            )}
-          </div>
-
-          {!cart || cart.items.length === 0 ? (
-<<<<<<< HEAD
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-16 text-center">
-              <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <ShoppingCart className="w-10 h-10 text-neutral-400" />
-              </div>
-              <h2 className="text-2xl font-semibold mb-2 text-neutral-800">
-                Your cart is empty
-              </h2>
-              <p className="text-neutral-500 mb-8">
-                Add some golf equipment to get started
-              </p>
-              <Link
-                href="/products"
-                className="inline-block bg-lime-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-lime-700 transition"
-=======
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <div className="text-6xl mb-4">🛒</div>
-              <h2 className="text-2xl font-semibold mb-2 text-neutral-700">
-                Your cart is empty
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Add some products to get started
-              </p>
-              <Link
-                href="/products"
-                className="inline-block bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition"
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
-              >
-                Browse Products
-              </Link>
-            </div>
-          ) : (
-<<<<<<< HEAD
-            <div className="grid lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                <StaggerContainer>
-                  {cart.items.map((item) => (
-                    <StaggerItem key={item.id}>
-                      <HoverCard>
-                      <div
-                        className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 flex items-center gap-6"
-                      >
-                    <div className="w-24 h-24 bg-neutral-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {item.product.image_url ? (
-                        <img
-                          src={item.product.image_url}
-                          alt={item.product.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Package className="w-8 h-8 text-neutral-400" />
-                      )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-neutral-800 truncate">
-                        {item.product.name}
-                      </h3>
-                      <p className="text-lime-600 font-bold mt-1">
-                        Rp {Number(item.product.price).toLocaleString('id-ID')}
-                      </p>
-                      <p className="text-xs text-neutral-500 mt-1">
-                        Stock: {item.product.stock}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2 bg-neutral-100 rounded-xl p-1">
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
-                        disabled={item.quantity <= 1}
-                        className="w-10 h-10 bg-white rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium text-neutral-700 transition"
-                      >
-                        −
-                      </button>
-                      <span className="w-12 text-center font-semibold text-neutral-800">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
-                        disabled={item.quantity >= item.product.stock}
-                        className="w-10 h-10 bg-white rounded-lg hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center font-medium text-neutral-700 transition"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <div className="text-right hidden sm:block">
-                      <p className="font-bold text-lg text-neutral-800">
-                        Rp{' '}
-                        {(
-                          Number(item.product.price) * item.quantity
-                        ).toLocaleString('id-ID')}
-                      </p>
-                      <button
-                        onClick={() => removeItem(item.id)}
-                        className="text-red-500 hover:text-red-600 text-sm mt-2 transition flex items-center gap-1"
-                      >
-                        <Trash2 size={14} /> Remove
-                      </button>
-                    </div>
-                    
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-600 sm:hidden transition p-2"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                  </HoverCard>
-                  </StaggerItem>
-                ))}
-                </StaggerContainer>
-=======
-            <div className="grid lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded-lg shadow-md divide-y">
-                  {cart.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-6"
-                    >
-                      {/* Product Image */}
-                      <div className="w-24 h-24 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {item.product.image_url ? (
-                          <img
-                            src={item.product.image_url}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-4xl">📦</span>
-                        )}
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1">
-                          {item.product.name}
-                        </h3>
-                        <p className="text-green-600 font-bold text-xl">
-                          Rp {Number(item.product.price).toLocaleString('id-ID')}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          Stock: {item.product.stock}
-                        </p>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
-                          }
-                          disabled={item.quantity <= 1}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          -
-                        </button>
-                        <span className="w-12 text-center font-semibold">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
-                          disabled={item.quantity >= item.product.stock}
-                          className="w-8 h-8 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* Item Total & Remove */}
-                      <div className="text-right">
-                        <p className="font-bold text-lg mb-2">
-                          Rp{' '}
-                          {(
-                            Number(item.product.price) * item.quantity
-                          ).toLocaleString('id-ID')}
-                        </p>
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="text-red-600 hover:underline text-sm"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))}
+          <div className="container mx-auto px-4 py-10 max-w-6xl">
+            
+            <FadeIn>
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-neutral-900">Shopping Cart</h1>
+                  <p className="text-neutral-500 mt-1">
+                    {cart?.items.length || 0} {cart?.items.length === 1 ? 'item' : 'items'}
+                  </p>
                 </div>
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
-              </div>
-
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-<<<<<<< HEAD
-                <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sticky top-8">
-                  <h2 className="text-xl font-bold mb-6 text-neutral-800">
-                    Order Summary
-                  </h2>
-
-                  <div className="space-y-4 mb-6">
-                    <div className="flex justify-between text-neutral-600">
-                      <span>Items ({cart.items.length})</span>
-                      <span className="font-medium">
-                        Rp {calculateTotal().toLocaleString('id-ID')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-neutral-600">
-                      <span>Shipping</span>
-                      <span className="font-medium text-lime-600">FREE</span>
-                    </div>
-                    
-                    <div className="border-t border-neutral-200 pt-4">
-                      <div className="flex justify-between text-xl font-bold">
-                        <span className="text-neutral-800">Total</span>
-                        <span className="text-lime-600">
-=======
-                <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
-                  <h2 className="text-xl font-bold mb-4 text-neutral-700">
-                    Order Summary
-                  </h2>
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Items</span>
-                      <span className="font-semibold">{cart.items.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Subtotal</span>
-                      <span className="font-semibold">
-                        Rp {calculateTotal().toLocaleString('id-ID')}
-                      </span>
-                    </div>
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between text-lg font-bold">
-                        <span>Total</span>
-                        <span className="text-green-600">
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
-                          Rp {calculateTotal().toLocaleString('id-ID')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
+                {cart && cart.items.length > 0 && (
                   <button
-                    onClick={handleCheckout}
-<<<<<<< HEAD
-                    className="w-full bg-lime-600 text-white py-4 rounded-xl font-semibold hover:bg-lime-700 transition shadow-sm"
-=======
-                    className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
+                    onClick={clearCart}
+                    className="text-sm text-red-500 hover:text-red-600 font-medium transition-colors"
                   >
-                    Proceed to Checkout
+                    Clear all
                   </button>
+                )}
+              </div>
+            </FadeIn>
 
+            {!cart || cart.items.length === 0 ? (
+              <FadeIn>
+                <div className="bg-white rounded-3xl shadow-sm border border-neutral-100 p-16 text-center">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-neutral-100 rounded-full flex items-center justify-center">
+                    <ShoppingBag size={40} className="text-neutral-400" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-neutral-800 mb-2">Your cart is empty</h2>
+                  <p className="text-neutral-500 mb-8 max-w-md mx-auto">
+                    Looks like you haven't added any items to your cart yet. Start shopping to fill it up!
+                  </p>
                   <Link
                     href="/products"
-<<<<<<< HEAD
-                    className="block w-full mt-3 bg-neutral-100 text-neutral-700 text-center py-3 rounded-xl font-medium hover:bg-neutral-200 transition"
-=======
-                    className="block w-full mt-3 bg-gray-200 text-gray-700 text-center py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
+                    className="inline-flex items-center gap-2 bg-lime-600 hover:bg-lime-700 text-white px-8 py-3.5 rounded-full font-semibold transition-all hover:shadow-lg hover:shadow-lime-500/25"
                   >
-                    Continue Shopping
+                    Browse Products
+                    <ArrowRight size={18} />
                   </Link>
                 </div>
+              </FadeIn>
+            ) : (
+              <div className="grid lg:grid-cols-3 gap-8">
+                
+                <div className="lg:col-span-2 space-y-4">
+                  {cart.items.map((item, index) => (
+                    <ScaleIn key={item.id} delay={index * 0.1}>
+                      <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-4 sm:p-6 hover:shadow-md transition-shadow">
+                        <div className="flex gap-4 sm:gap-6">
+                          
+                          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-neutral-100 rounded-xl flex-shrink-0 overflow-hidden">
+                            {item.product.image_url ? (
+                              <img 
+                                src={item.product.image_url} 
+                                alt={item.product.name}
+                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <Package size={32} className="text-neutral-300" />
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between gap-4">
+                              <div className="min-w-0">
+                                <h3 className="font-semibold text-neutral-800 truncate">{item.product.name}</h3>
+                                <p className="text-lime-600 font-bold text-lg mt-1">
+                                  Rp {Number(item.product.price).toLocaleString('id-ID')}
+                                </p>
+                              </div>
+                              <button 
+                                onClick={() => removeItem(item.id)}
+                                className="text-neutral-400 hover:text-red-500 p-2 transition-colors"
+                                aria-label="Remove item"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
+
+                            <div className="flex items-center justify-between mt-4">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                  disabled={updatingIds.has(item.id) || item.quantity <= 1}
+                                  className="w-9 h-9 bg-neutral-100 hover:bg-neutral-200 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                                >
+                                  <Minus size={16} />
+                                </button>
+                                <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                                <button
+                                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                  disabled={updatingIds.has(item.id) || item.quantity >= item.product.stock}
+                                  className="w-9 h-9 bg-neutral-100 hover:bg-neutral-200 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                              </div>
+                              
+                              <div className="text-right">
+                                <p className="text-xs text-neutral-500">Subtotal</p>
+                                <p className="font-bold text-neutral-800">
+                                  Rp {(Number(item.product.price) * item.quantity).toLocaleString('id-ID')}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </ScaleIn>
+                  ))}
+                </div>
+
+                <div className="lg:col-span-1">
+                  <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 sticky top-24">
+                    <h2 className="font-bold text-lg text-neutral-800 mb-6">Order Summary</h2>
+                    
+                    <div className="space-y-3 mb-6">
+                      <div className="flex justify-between text-neutral-500">
+                        <span>Subtotal</span>
+                        <span>Rp {calculateTotal().toLocaleString('id-ID')}</span>
+                      </div>
+                      <div className="flex justify-between text-neutral-500">
+                        <span>Shipping</span>
+                        <span>Calculated at checkout</span>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-neutral-100 pt-4 mb-6">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total</span>
+                        <span className="text-lime-600">Rp {calculateTotal().toLocaleString('id-ID')}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={handleCheckout}
+                      className="w-full bg-neutral-900 hover:bg-lime-600 text-white py-4 rounded-xl font-semibold transition-all hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                      Proceed to Checkout
+                      <ArrowRight size={18} />
+                    </button>
+
+                    <div className="mt-6 pt-4 border-t border-neutral-100">
+                      <div className="flex items-center gap-2 text-neutral-500 text-sm">
+                        <ShieldCheck size={16} className="text-lime-500" />
+                        <span>Secure checkout guaranteed</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-<<<<<<< HEAD
       </PageTransition>
       <Footer />
-=======
->>>>>>> 687640a364110c573b580e6a98b33ac2f5ffabb8
     </>
   );
 }
