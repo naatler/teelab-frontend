@@ -259,7 +259,6 @@ export default function ProductDetailPage() {
                   {product.stock === 0 ? 'Sold Out' : 'Add to Cart'}
                 </button>
 
-                {/* Admin Actions */}
                 {isAdmin() && (
                   <div className="mt-4">
                     <Link
@@ -319,7 +318,7 @@ export default function ProductDetailPage() {
                 <textarea
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
-                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none"
+                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none text-neutral-800"
                   rows={4}
                   placeholder="Share your experience with this product..."
                 />

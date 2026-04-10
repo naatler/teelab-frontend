@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, Quote } from "lucide-react";
 import axios from "@/app/lib/axios";
 import Footer from "@/app/components/Footer";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/app/components/PageTransition";
@@ -428,6 +428,79 @@ export default function Home() {
                 )}
               </div>
             </div>
+          </div>
+        </div>
+        </PageTransition>
+      </section>
+       <section id="reviews" className="bg-neutral-50 py-20">
+        <PageTransition>
+        <div className="container mx-auto px-4">
+          <FadeIn>
+          <div className="text-center mb-12">
+            <p className="text-lime-600 font-medium mb-2">Testimonials</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-neutral-800">What Our Customers Say</h2>
+          </div>
+          </FadeIn>
+
+          {reviewsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white p-6 rounded-2xl animate-pulse">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, j) => <Star key={j} className="w-5 h-5 text-neutral-200" />)}
+                  </div>
+                  <div className="h-4 bg-neutral-200 rounded mb-2" />
+                  <div className="h-4 bg-neutral-200 rounded w-2/3" />
+                </div>
+              ))}
+            </div>
+          ) : reviews.length > 0 ? (
+            <StaggerContainer>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.slice(0, 6).map((review, index) => (
+                <FadeIn key={review.id} delay={index * 0.1}>
+                <div className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star 
+                        key={i} 
+                        size={20} 
+                        className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-neutral-200"} 
+                      />
+                    ))}
+                  </div>
+                  <div className="relative mb-4">
+                    <Quote className="absolute -top-1 -left-1 w-8 h-8 text-lime-100" />
+                    <p className="text-neutral-600 line-clamp-4 pl-6">{review.comment}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-lime-100 rounded-full flex items-center justify-center">
+                      <span className="text-lime-600 font-semibold">
+                        {review.user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-neutral-800">{review.user?.name || 'User'}</p>
+                      {review.product && (
+                        <p className="text-sm text-neutral-500">{review.product.name}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                </FadeIn>
+              ))}
+            </div>
+            </StaggerContainer>
+          ) : (
+            <div className="text-center py-12 text-neutral-500">
+              No reviews yet. Be the first to review!
+            </div>
+          )}
+          
+          <div className="text-center mt-10">
+            <Link href="/products" className="inline-flex items-center gap-2 text-lime-600 hover:text-lime-700 font-medium">
+              View all products <ShoppingBag size={18} />
+            </Link>
           </div>
         </div>
         </PageTransition>

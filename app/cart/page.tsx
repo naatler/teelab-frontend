@@ -250,15 +250,15 @@ export default function CartPage() {
                                 <button
                                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                                   disabled={updatingIds.has(item.id) || item.quantity <= 1}
-                                  className="w-9 h-9 bg-neutral-100 hover:bg-neutral-200 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                                  className="w-9 h-9 bg-neutral-600 hover:bg-neutral-800 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
                                 >
                                   <Minus size={16} />
                                 </button>
-                                <span className="w-12 text-center font-semibold">{item.quantity}</span>
+                                <span className="w-12 text-center text-neutral-800 font-semibold">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
                                   disabled={updatingIds.has(item.id) || item.quantity >= item.product.stock}
-                                  className="w-9 h-9 bg-neutral-100 hover:bg-neutral-200 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                                  className="w-9 h-9 bg-neutral-600 hover:bg-neutral-800 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
                                 >
                                   <Plus size={16} />
                                 </button>
