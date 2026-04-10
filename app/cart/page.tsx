@@ -32,7 +32,7 @@ interface Cart {
 export default function CartPage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  const { setItems } = useCartStore();
+  const { setItems, items } = useCartStore();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -44,19 +44,40 @@ export default function CartPage() {
   useEffect(() => {
     if (!mounted) return;
     
-    if (!user) {
-      router.push('/login');
-      return;
+    // Debug: log user state
+    console.log('Cart page - user:', user);
+    
+    // Check if user exists in zustand store
+    const checkAuth = () => {
+      const authStorage = localStorage.getItem('auth-storage');
+      console.log('Cart page - auth storage:', authStorage);
+      
+      if (!authStorage) {
+        router.push('/login');
+        return;
+      }
+      fetchCart();
+    };
+    
+    // If user state is set, fetch cart
+    if (user) {
+      fetchCart();
+    } else {
+      // Check localStorage directly for persisted state
+      setTimeout(checkAuth, 50);
     }
-    fetchCart();
   }, [user, mounted]);
 
   const fetchCart = async () => {
+    if (!mounted) return;
+    
     try {
       const response = await axios.get('/cart');
+      console.log('Cart response:', response.data);
       setCart(response.data);
       setItems(response.data.items || []);
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Failed to fetch cart:', error);
       toast.error('Failed to fetch cart');
     } finally {
       setLoading(false);

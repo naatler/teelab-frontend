@@ -1,16 +1,17 @@
-# TeeLab E-commerce Frontend
+# TeeLab Frontend
 
-Next.js frontend for TeeLab golf e-commerce platform.
+Frontend aplikasi e-commerce golf TeeLab, dibangun dengan Next.js 16 App Router.
 
-## Tech Stack
-
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **State Management:** Zustand
-- **Data Fetching:** React Query
-- **HTTP Client:** Axios
-- **Notifications:** React Hot Toast
+## Teknologi
+- **Framework**: Next.js 16 (App Router)
+- **Bahasa**: TypeScript
+- **Styling**: Tailwind CSS 4
+- **State Management**: Zustand
+- **Data Fetching**: TanStack React Query
+- **Animasi**: Framer Motion
+- **HTTP Client**: Axios
+- **Icons**: Lucide React
+- **Notifications**: React Hot Toast
 
 ## Prerequisites
 

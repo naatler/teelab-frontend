@@ -100,7 +100,7 @@ export default function RegisterPage() {
   };
 
   const getInputClass = (errorKey?: string) => {
-    return `w-full px-4 py-3.5 bg-white border rounded-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
+    return `w-full px-4 py-3.5 bg-white border rounded-xl text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
       errorKey
         ? "border-red-500 focus:ring-red-100"
         : "border-neutral-200 focus:ring-lime-100 focus:border-lime-500"

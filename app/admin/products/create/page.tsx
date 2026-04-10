@@ -125,7 +125,7 @@ export default function CreateProductPage() {
         return;
       }
 
-      await axios.post("/products", {
+      await axios.post("/admin/products", {
         name: form.name,
         slug: form.name.toLowerCase().replace(/\s+/g, "-"),
         price: Number(form.price),

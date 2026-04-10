@@ -4,12 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from '@/app/lib/axios';
 import Navbar from '@/app/components/Navbar';
+import Footer from '@/app/components/Footer';
 import { useAuthStore } from '@/app/store/useAuthStore';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { FiShoppingBag, FiClock, FiPackage, FiTruck, FiCheck, FiX, FiCreditCard } from 'react-icons/fi';
+import { FiShoppingBag, FiClock, FiPackage, FiTruck, FiCheck, FiX, FiCreditCard, FiStar } from 'react-icons/fi';
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from '@/app/components/PageTransition';
+import { Star } from 'lucide-react';
 
 interface Order {
   id: string;
@@ -23,12 +25,26 @@ interface Order {
   } | null;
 }
 
+interface PurchasedProduct {
+  id: string;
+  name: string;
+  image_url: string | null;
+  price: number;
+  has_reviewed: boolean;
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [purchasedProducts, setPurchasedProducts] = useState<PurchasedProduct[]>([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<PurchasedProduct | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     const token = Cookies.get('token');
@@ -39,6 +55,7 @@ export default function OrdersPage() {
     }
 
     fetchOrders();
+    fetchPurchasedProducts();
   }, [user]);
 
   const fetchOrders = async () => {
@@ -64,6 +81,39 @@ export default function OrdersPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPurchasedProducts = async () => {
+    try {
+      const { data } = await axios.get('/reviews/purchased');
+      setPurchasedProducts(data.filter((p: PurchasedProduct) => !p.has_reviewed));
+    } catch (error) {
+      console.error('Failed to fetch purchased products:', error);
+    }
+  };
+
+  const submitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    setSubmittingReview(true);
+    try {
+      await axios.post('/reviews', {
+        product_id: selectedProduct.id,
+        rating: reviewRating,
+        comment: reviewComment,
+      });
+      toast.success('Review submitted!');
+      setShowReviewModal(false);
+      setSelectedProduct(null);
+      setReviewRating(5);
+      setReviewComment('');
+      fetchPurchasedProducts();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -226,9 +276,103 @@ export default function OrdersPage() {
             </div>
             </StaggerContainer>
           )}
+
+          {purchasedProducts.length > 0 && (
+            <FadeIn delay={0.2}>
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-neutral-800 mb-4">Rate Your Products</h2>
+              <p className="text-neutral-500 mb-6">You have products waiting for your review</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {purchasedProducts.map((product) => (
+                  <div key={product.id} className="bg-white rounded-xl p-4 border border-neutral-200">
+                    <div className="aspect-square bg-neutral-100 rounded-lg mb-3 overflow-hidden">
+                      {product.image_url ? (
+                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-4xl">🏌️</span>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="font-medium text-neutral-800 text-sm line-clamp-2 mb-2">{product.name}</h3>
+                    <button
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setShowReviewModal(true);
+                      }}
+                      className="w-full py-2 bg-lime-600 text-white rounded-lg text-sm font-medium hover:bg-lime-700 transition"
+                    >
+                      Write Review
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            </FadeIn>
+          )}
         </div>
       </div>
       </PageTransition>
+
+      {showReviewModal && selectedProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-bold text-neutral-800 mb-4">Review {selectedProduct.name}</h3>
+            <form onSubmit={submitReview}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Rating</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="p-1"
+                    >
+                      <Star
+                        className={`w-8 h-8 ${
+                          star <= reviewRating ? 'text-yellow-400 fill-yellow-400' : 'text-neutral-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">Comment</label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  className="w-full px-4 py-3 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none"
+                  rows={4}
+                  placeholder="Share your experience with this product..."
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="flex-1 py-3 bg-lime-600 text-white rounded-lg font-medium hover:bg-lime-700 disabled:opacity-50 transition"
+                >
+                  {submittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setSelectedProduct(null);
+                  }}
+                  className="px-6 py-3 border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-100 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </>
   );
 }

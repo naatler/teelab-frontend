@@ -90,10 +90,10 @@ export default function AdminCategoriesPage() {
 
     try {
       if (editingCategory) {
-        await axios.patch(`/categories/${editingCategory.id}`, formData);
+        await axios.patch(`/admin/categories/${editingCategory.id}`, formData);
         toast.success('Category updated successfully');
       } else {
-        await axios.post('/categories', formData);
+        await axios.post('/admin/categories', formData);
         toast.success('Category created successfully');
       }
       setShowModal(false);
@@ -122,7 +122,7 @@ export default function AdminCategoriesPage() {
     if (!confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      await axios.delete(`/categories/${id}`);
+      await axios.delete(`/admin/categories/${id}`);
       toast.success('Category deleted successfully');
       fetchCategories();
     } catch (error: any) {
@@ -254,7 +254,7 @@ export default function AdminCategoriesPage() {
                     handleNameChange(e.target.value);
                     if (errors.name) setErrors({ ...errors, name: undefined });
                   }}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-2 border rounded-lg text-neutral-700 focus:outline-none focus:ring-2 ${
                     errors.name 
                       ? 'border-red-500 focus:ring-red-400' 
                       : 'border-neutral-300 focus:ring-lime-500'
@@ -274,7 +274,7 @@ export default function AdminCategoriesPage() {
                     setFormData({ ...formData, slug: e.target.value });
                     if (errors.slug) setErrors({ ...errors, slug: undefined });
                   }}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                  className={`w-full px-4 py-2 border rounded-lg text-neutral-700 focus:outline-none focus:ring-2 ${
                     errors.slug 
                       ? 'border-red-500 focus:ring-red-400' 
                       : 'border-neutral-300 focus:ring-lime-500'

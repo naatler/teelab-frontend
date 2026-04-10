@@ -5,15 +5,22 @@ import { useAuthStore } from "@/app/store/useAuthStore";
 import { useCartStore } from "@/app/store/useCartStore";
 import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { Menu, X } from "lucide-react";
 import axios from "@/app/lib/axios";
 
 export default function Navbar() {
   const { user, logout } = useAuthStore();
-  const { totalItems, setItems } = useCartStore();
+  const items = useCartStore((state) => state.items);
+  const setItems = useCartStore((state) => state.setItems);
   const [openMenu, setOpenMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,10 +31,11 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    if (!mounted) return;
     if (user) {
       fetchCart();
     }
-  }, [user]);
+  }, [user, mounted]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -42,9 +50,15 @@ export default function Navbar() {
   const fetchCart = async () => {
     try {
       const { data } = await axios.get('/cart');
-      setItems(data.items || []);
-    } catch (error) {
-      console.error('Failed to fetch cart');
+      setItems(data?.items || []);
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.warn('Cart requires login');
+        setItems([]);
+      } else {
+        console.error('Failed to fetch cart:', error.message);
+        setItems([]);
+      }
     }
   };
 
@@ -59,7 +73,9 @@ export default function Navbar() {
     section?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const cartCount = totalItems();
+  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const closeMobileMenu = () => setOpenMenu(false);
 
   return (
     <nav 
@@ -69,16 +85,11 @@ export default function Navbar() {
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/landingpage" className="flex-shrink-0">
-            <img
-              src="/images/logo.png"
-              alt="TeeLab"
-              className="h-6 w-auto object-contain"
-            />
-          </Link>
+          <h1 className="text-3xl font-medium text-lime-300">
+            Tee<span className="text-neutral-100">lab</span>
+          </h1>
 
-          {/* Navigation Links - Desktop */}
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center w-full px-28">
             <Link 
               href="/landingpage" 
@@ -107,8 +118,15 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right Side - Cart & User */}
-          <div className="flex items-center gap-4">
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden text-white p-2"
+            onClick={() => setOpenMenu(!openMenu)}
+          >
+            {openMenu ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <div className="hidden md:flex items-center gap-4">
             {user && (
               <Link
                 href="/cart"
@@ -125,7 +143,6 @@ export default function Navbar() {
               </Link>
             )}
 
-            {/* User Menu */}
             <div className="relative" ref={menuRef}>
               <button
                 className="flex items-center gap-3 hover:bg-white/10 rounded-xl transition duration-300 p-2 cursor-pointer"
@@ -151,7 +168,6 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* Dropdown Menu */}
               {openMenu && user && (
                 <div className="absolute right-0 mt-2 w-56 bg-neutral-800/95 backdrop-blur-md rounded-xl shadow-xl border border-neutral-700/50 overflow-hidden">
                   <div className="px-4 py-3 border-b border-neutral-700">
@@ -206,6 +222,101 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {openMenu && (
+        <div className="md:hidden bg-neutral-900/95 backdrop-blur-md absolute top-20 left-0 w-full shadow-lg border-t border-neutral-800">
+          <div className="flex flex-col p-4 gap-4">
+            <Link 
+              href="/landingpage" 
+              className="text-neutral-200 py-3 px-4 hover:bg-white/10 rounded-lg transition"
+              onClick={closeMobileMenu}
+            >
+              Home
+            </Link>
+            <button 
+              onClick={() => {
+                scrollToStory();
+                closeMobileMenu();
+              }}
+              className="text-neutral-200 py-3 px-4 hover:bg-white/10 rounded-lg transition text-left"
+            >
+              Our Story
+            </button>
+            <Link 
+              href="/products" 
+              className="text-neutral-200 py-3 px-4 hover:bg-white/10 rounded-lg transition"
+              onClick={closeMobileMenu}
+            >
+              Shop Now
+            </Link>
+            
+            <div className="border-t border-neutral-700 pt-4">
+              {user && (
+                <Link
+                  href="/cart"
+                  className="text-neutral-200 py-3 px-4 hover:bg-white/10 rounded-lg transition flex items-center justify-between"
+                  onClick={closeMobileMenu}
+                >
+                  Cart
+                  {cartCount > 0 && (
+                    <span className="bg-lime-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {cartCount > 9 ? '9+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+
+              {user ? (
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="px-4 py-3">
+                    <p className="text-white font-medium">{user.name}</p>
+                    <p className="text-neutral-400 text-sm">{user.email}</p>
+                  </div>
+                  
+                  {user.role === 'admin' ? (
+                    <>
+                      <Link href="/admin/products" className="text-neutral-300 py-2.5 px-4 hover:bg-white/10 rounded-lg transition" onClick={closeMobileMenu}>
+                        Admin Products
+                      </Link>
+                      <Link href="/admin/orders" className="text-neutral-300 py-2.5 px-4 hover:bg-white/10 rounded-lg transition" onClick={closeMobileMenu}>
+                        Admin Orders
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/orders" className="text-neutral-300 py-2.5 px-4 hover:bg-white/10 rounded-lg transition" onClick={closeMobileMenu}>
+                        My Orders
+                      </Link>
+                      <Link href="/profile/addresses" className="text-neutral-300 py-2.5 px-4 hover:bg-white/10 rounded-lg transition" onClick={closeMobileMenu}>
+                        My Addresses
+                      </Link>
+                    </>
+                  )}
+
+                  <button 
+                    onClick={() => {
+                      handleLogout();
+                      closeMobileMenu();
+                    }}
+                    className="text-red-400 py-2.5 px-4 hover:bg-red-500/10 rounded-lg transition text-left mt-2"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-neutral-200 py-3 px-4 hover:bg-white/10 rounded-lg transition mt-2"
+                  onClick={closeMobileMenu}
+                >
+                  Login
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "@/app/lib/axios";
 import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import toast from "react-hot-toast";
 import { FiMapPin, FiEdit, FiTrash2, FiStar, FiPlus } from "react-icons/fi";
@@ -210,7 +211,7 @@ export default function AddressesPage() {
   };
 
   const getInputClass = (errorKey?: string) => {
-    return `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+    return `w-full px-4 py-2 border rounded-lg text-neutral-700 focus:outline-none focus:ring-2 ${
       errorKey
         ? "border-red-500 focus:ring-red-400"
         : "border-neutral-300 focus:ring-lime-500"
@@ -368,6 +369,8 @@ export default function AddressesPage() {
           </div>
         </div>
       </PageTransition>
+
+      <Footer />
 
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

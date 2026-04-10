@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import axios from "@/app/lib/axios";
 import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/app/store/useAuthStore";
 import { useCartStore } from "@/app/store/useCartStore";
@@ -43,8 +44,11 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchCategories();
     fetchProducts();
-    fetchCart();
   }, [search, selectedCategory]);
+
+  useEffect(() => {
+    fetchCart();
+  }, [user]);
 
   const fetchCart = async () => {
     try {
@@ -80,30 +84,28 @@ export default function ProductsPage() {
   };
 
   const addToCart = async (productId: string) => {
-    const token = Cookies.get("token");
-    if (!token) {
+    if (!user) {
       toast.error("Please login first");
       router.push("/login");
       return;
     }
 
     try {
-      const { data } = await axios.post("/cart/items", {
+      await axios.post("/cart/items", {
         product_id: productId,
         quantity: 1,
       });
       toast.success("Added to cart!");
-      
-      // Update local cart store - check if product exists, update qty or add new
-      const existingItem = cartItems.find(item => item.product_id === productId);
-      if (existingItem) {
-        addToCartStore({ ...existingItem, quantity: existingItem.quantity + 1 });
-      } else {
-        // Fetch the updated cart to get the new item
-        fetchCart();
-      }
+      await fetchCart();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to add to cart");
+      console.error('Add to cart error:', error);
+      const status = error.response?.status;
+      if (status === 401 || status === 403) {
+        toast.error("Session expired. Please login again");
+        router.push("/login");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to add to cart");
+      }
     }
   };
 
@@ -194,7 +196,7 @@ export default function ProductsPage() {
                 <StaggerItem key={product.id}>
                   <div className="bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-lime-200 hover:shadow-lg hover:shadow-lime-100/50 transition-all duration-300 group">
                     <Link href={`/products/${product.id}`}>
-                      <div className="relative aspect-square bg-neutral-100 overflow-hidden">
+                      <div className="relative aspect-square bg-white overflow-hidden">
                         {product.image_url ? (
                           <img
                             src={product.image_url}
@@ -220,7 +222,7 @@ export default function ProductsPage() {
 
                     <div className="p-4">
                       <p className="text-xs font-medium text-neutral-400 uppercase tracking-wide mb-1">
-                        {product.category.name}
+                        {product.category?.name || 'Uncategorized'}
                       </p>
                       <Link href={`/products/${product.id}`}>
                         <h3 className="font-semibold text-neutral-800 mb-2 line-clamp-2 hover:text-lime-600 transition-colors min-h-[2.5rem]">
@@ -262,6 +264,7 @@ export default function ProductsPage() {
         </div>
         </PageTransition>
       </div>
+      <Footer />
     </>
   );
 }

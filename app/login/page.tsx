@@ -107,7 +107,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={(e) => handleChange('email', e.target.value)}
                   placeholder="name@example.com"
-                  className={`w-full pl-12 pr-4 py-3.5 bg-white border rounded-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full pl-12 pr-4 py-3.5 bg-white border rounded-xl text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
                     errors.email 
                       ? 'border-red-500 focus:ring-red-100' 
                       : 'border-neutral-200 focus:ring-lime-100 focus:border-lime-500'
@@ -130,7 +130,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={(e) => handleChange('password', e.target.value)}
                   placeholder="••••••••"
-                  className={`w-full pl-12 pr-12 py-3.5 bg-white border rounded-xl text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full pl-12 pr-12 py-3.5 bg-white border rounded-xl text-neutral-700 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all ${
                     errors.password 
                       ? 'border-red-500 focus:ring-red-100' 
                       : 'border-neutral-200 focus:ring-lime-100 focus:border-lime-500'

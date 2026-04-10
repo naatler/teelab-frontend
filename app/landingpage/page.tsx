@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/app/components/Navbar";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, Star } from "lucide-react";
 import axios from "@/app/lib/axios";
 import Footer from "@/app/components/Footer";
 import PageTransition, { StaggerContainer, StaggerItem, FadeIn } from "@/app/components/PageTransition";
+import { useAuthStore } from "@/app/store/useAuthStore";
 import { useCartStore } from "@/app/store/useCartStore";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 interface Category {
   id: string;
@@ -25,7 +28,23 @@ interface Product {
   category: Category;
 }
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+  user: {
+    name: string;
+  };
+  product?: {
+    name: string;
+    image_url: string | null;
+  };
+}
+
 export default function Home() {
+  const router = useRouter();
+  const { user } = useAuthStore();
   const { items: cartItems, addItem: addToCartStore, setItems: setCartItems, totalItems } = useCartStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,11 +53,17 @@ export default function Home() {
   const [subscribing, setSubscribing] = useState(false);
   const [subscribeMessage, setSubscribeMessage] = useState("");
   const [subscribeSuccess, setSubscribeSuccess] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
-    fetchCart();
+    fetchFeaturedReviews();
   }, []);
+
+  useEffect(() => {
+    fetchCart();
+  }, [user]);
 
   const fetchCart = async () => {
     try {
@@ -50,7 +75,14 @@ export default function Home() {
   };
 
   const handleAddToCart = async (productId: string) => {
+    if (!user) {
+      toast.error("Please login first");
+      router.push("/login");
+      return;
+    }
+
     try {
+      console.log('Adding to cart, user:', user, 'token:', Cookies.get('token'));
       const { data } = await axios.post('/cart/items', {
         product_id: productId,
         quantity: 1,
@@ -58,7 +90,14 @@ export default function Home() {
       toast.success('Added to cart!');
       fetchCart();
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to add to cart');
+      console.error('Add to cart error:', error);
+      const status = error.response?.status;
+      if (status === 401 || status === 403) {
+        toast.error("Session expired. Please login again");
+        router.push("/login");
+      } else {
+        toast.error(error.response?.data?.message || 'Failed to add to cart');
+      }
     }
   };
 
@@ -95,6 +134,17 @@ export default function Home() {
     }
   };
 
+  const fetchFeaturedReviews = async () => {
+    try {
+      const { data } = await axios.get('/reviews/featured');
+      setReviews(data);
+    } catch (error) {
+      console.error('Failed to fetch reviews:', error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   return (
     <div className="overflow-x-hidden">
       <main className="relative py-20">
@@ -115,13 +165,13 @@ export default function Home() {
                 Performance Meets Everyday Style.
               </h1>
 
-              <Link
+               <Link
                 href="/products"
                 className="flex items-center gap-4 px-8 py-3 rounded-full 
                 bg-white/20 backdrop-blur-lg border border-white/30 
                 text-white text-sm sm:text-base font-medium 
                 hover:bg-white/30 hover:scale-105 transition-all duration-300 
-                self-start md:self-end whitespace-nowrap -translate-x-120 -translate-y-5 "
+                self-start md:self-end whitespace-nowrap"
               >
                 <span className="opacity-90">Go Product</span>
 
@@ -155,9 +205,54 @@ export default function Home() {
             </h2>
           </div>
           <FadeIn delay={0.2}>
-          <div className="flex items-center gap-10 py-20">
-            <img src="/images/ourimage1.png" alt="" className="h-90" />
-            <img src="/images/ourimage.png" alt="" className="h-90" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-20 items-center">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-10 justify-center">
+              <img src="/images/ourimage1.png" alt="" className="w-full md:w-auto max-h-[300px] md:max-h-[360px] object-contain" />
+              <img src="/images/ourimage.png" alt="" className="w-full md:w-auto max-h-[300px] md:max-h-[360px] object-contain" />
+            </div>
+            <div className="space-y-8 px-4">
+              <h3 className="text-3xl font-semibold text-neutral-700">
+                Why Choose TeeLab?
+              </h3>
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 text-lg">Premium Quality</h4>
+                    <p className="text-neutral-500">We curate only the finest golf equipment from trusted brands worldwide.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 text-lg">Best Prices</h4>
+                    <p className="text-neutral-500">Competitive pricing with exclusive deals for members.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 text-lg">Expert Support</h4>
+                    <p className="text-neutral-500">Our golf specialists are here to help you choose the right gear.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-lime-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 text-lg">Fast Shipping</h4>
+                    <p className="text-neutral-500">Quick delivery nationwide with careful packaging.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           </FadeIn>
         </div>
@@ -177,10 +272,10 @@ export default function Home() {
             </span>
           </h1>
           <FadeIn delay={0.2}>
-          <div className="flex items-center gap-10 py-20 justify-center">
-            <img src="/images/nearby1.png" alt="" className="w-[460px]" />
-            <img src="/images/nearby.png" alt="" className="w-[547px]" />
-            <img src="/images/nearby2.png" alt="" className="w-[480px]" />
+          <div className="flex flex-col md:flex-row items-center gap-6 py-10 md:py-20 justify-center">
+            <img src="/images/nearby1.png" alt="" className="w-full md:w-[300px] lg:w-[460px] object-contain" />
+            <img src="/images/nearby.png" alt="" className="w-full md:w-[350px] lg:w-[547px] object-contain" />
+            <img src="/images/nearby2.png" alt="" className="w-full md:w-[300px] lg:w-[480px] object-contain" />
           </div>
           </FadeIn>
         </div>
@@ -193,10 +288,10 @@ export default function Home() {
           <p className="text-center text-neutral-500 border-2 border-neutral-500 rounded-full py-2 max-w-[130px] mb-8">
             Category
           </p>
-          <h2 className="text-5xl font-medium text-neutral-700 mb-2">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-medium text-neutral-700 mb-2">
             Top-Quality Golf Equipment for
           </h2>
-          <h3 className="text-5xl font-medium text-neutral-400 mb-8">
+          <h3 className="text-3xl sm:text-4xl md:text-5xl font-medium text-neutral-400 mb-8">
             Every Game!
           </h3>
 
@@ -204,6 +299,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12">
                 {categories.map((category) => (
                     <Link
+                      key={category.id}
                       href={`/products?category=${category.id}`}
                       className="bg-white hover:bg-neutral-100 p-1 rounded-full text-center transition border-2 border-neutral-300"
                     >
@@ -228,7 +324,7 @@ export default function Home() {
                     <StaggerItem key={product.id}>
                       <div className="bg-white rounded-2xl overflow-hidden border border-neutral-100 hover:border-lime-200 hover:shadow-lg hover:shadow-lime-100/50 transition-all duration-300 group">
                         <Link href={`/products/${product.id}`}>
-                          <div className="relative aspect-square bg-neutral-100 overflow-hidden">
+                          <div className="relative aspect-square bg-white overflow-hidden">
                             {product.image_url ? (
                               <img
                                 src={product.image_url}
@@ -292,19 +388,19 @@ export default function Home() {
         <PageTransition>
         <div className="container mx-auto px-4">
           <div className="bg-neutral-800 min-h-[400px] rounded-2xl p-6">
-            <div className="flex items-start gap-8">
+            <div className="flex flex-col lg:flex-row items-center gap-6">
               <img
                 src="/images/course.png"
                 alt=""
-                className="h-80 object-contain"
+                className="w-full lg:w-auto h-64 lg:h-80 object-contain order-2 lg:order-1"
               />
-              <div className="flex flex-col gap-4 ">
+              <div className="flex flex-col gap-4 w-full lg:w-auto order-1 lg:order-2">
                 <p className="text-neutral-100 border border-neutral-600 rounded-full px-4 py-2 w-fit">
                   Course
                 </p>
 
-                <h1 className="text-5xl font-medium text-neutral-100 max-w-3xl mt-20">
-               Get Golf Tips & Exclusive Deals - Join Course Now!
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-medium text-neutral-100 max-w-3xl mt-4 lg:mt-20">
+                  Get Golf Tips & Exclusive Deals - Join Course Now!
                 </h1>
                  <FadeIn delay={0.2}>
                  <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 mt-4">

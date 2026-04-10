@@ -53,7 +53,7 @@ export default function AdminProductsPage() {
 
   const fetchProducts = async () => {
     try {
-      const { data } = await axios.get('/products?all=true');
+      const { data } = await axios.get('/admin/products?all=true');
       setProducts(data);
     } catch (error) {
       toast.error('Failed to fetch products');
@@ -67,7 +67,7 @@ export default function AdminProductsPage() {
     
     setDeleteId(id);
     try {
-      await axios.delete(`/products/${id}`);
+      await axios.delete(`/admin/products/${id}`);
       toast.success('Product deleted!');
       fetchProducts();
     } catch (error: any) {
@@ -132,7 +132,7 @@ export default function AdminProductsPage() {
                       placeholder="Search products..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-12 pr-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-100 focus:border-lime-500 transition-all"
+                      className="w-full pl-12 pr-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-700 focus:outline-none focus:ring-2 focus:ring-lime-100 focus:border-lime-500 transition-all"
                     />
                   </div>
                   <div className="relative">
@@ -140,7 +140,7 @@ export default function AdminProductsPage() {
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className="pl-12 pr-10 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-lime-100 focus:border-lime-500 transition-all appearance-none cursor-pointer"
+                      className="pl-12 pr-10 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-700 focus:outline-none focus:ring-2 focus:ring-lime-100 focus:border-lime-500 transition-all appearance-none cursor-pointer"
                     >
                       <option value="all">All Status</option>
                       <option value="active">Active</option>

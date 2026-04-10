@@ -8,7 +8,6 @@ export default function Footer() {
       <div className="container mx-auto px-4 md:px-8 py-12 md:py-16">
         <div className="grid md:grid-cols-2 gap-10 lg:gap-16">
           
-          {/* Contact Section */}
           <div>
             <h2 className="text-2xl md:text-3xl font-bold mb-8">Contact Us</h2>
     
@@ -50,7 +49,6 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Get In Touch Section */}
           <div className="flex flex-col justify-between">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold mb-6">Get In Touch</h2>
@@ -82,15 +80,12 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="border-t border-neutral-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-3">
-              <img
-                src="/images/logo.png"
-                alt="TeeLab"
-                className="h-6 w-auto"
-              />
+          <h1 className="text-3xl font-medium text-lime-300 mb-6">
+            Tee<span className="text-neutral-100">lab</span>
+          </h1>
               <span className="text-neutral-500 text-sm">© 2026 TeeLab.</span>
             </div>
             <p className="text-neutral-500 text-sm text-center md:text-right">

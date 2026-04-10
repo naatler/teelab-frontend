@@ -136,7 +136,7 @@ export default function EditProductPage() {
     try {
       const imageUrl = await uploadImage();
 
-      await axios.patch(`/products/${id}`, {
+      await axios.patch(`/admin/products/${id}`, {
         name: form.name,
         slug: form.name.toLowerCase().replace(/\s+/g, '-'),
         price: Number(form.price),
